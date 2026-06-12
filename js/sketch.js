@@ -6,15 +6,25 @@ let liqDensity = 1.0;
 // Variables de estado físico (Cinemática)
 let blockY = 50;
 let velocityY = 0;
-let gravity = 0.3;
-let drag = 0.92; // Resistencia del fluido
+const gravity = 9.8;
+const motionScale = 0.45;
+const drag = 0.92; // Resistencia del fluido
 
 // Dimensiones de la escena
 const tankX = 100, tankY = 150, tankW = 250, tankH = 300;
 const liquidLevelY = 200;
 
 // Elementos del DOM
-let sliderMasa, sliderVol, sliderLiq;
+let sliderMasa, sliderVol, sliderLiq, materialPresets, liquidPresets, playPauseBtn, resetBtn;
+let simulationActive = true;
+
+const defaultState = {
+    mass: 50,
+    vol: 100,
+    liqDensity: 1.0,
+    blockY: 50,
+    velocityY: 0
+};
 
 function setup() {
     let canvas = createCanvas(900, 550);
@@ -24,11 +34,43 @@ function setup() {
     sliderMasa = select('#slider-masa');
     sliderVol = select('#slider-volumen');
     sliderLiq = select('#slider-liq');
+    materialPresets = select('#material-presets');
+    liquidPresets = select('#liquid-presets');
+    playPauseBtn = select('#play-pause-btn');
+    resetBtn = select('#reset-btn');
 
     // Event Listeners para actualizar badges UI
-    sliderMasa.input(() => select('#val-masa').html(`${sliderMasa.value()} kg`));
-    sliderVol.input(() => select('#val-volumen').html(`${sliderVol.value()} L`));
-    sliderLiq.input(() => select('#val-liq').html(`${sliderLiq.value()} kg/L`));
+    sliderMasa.input(() => {
+        if (materialPresets.value() === 'manual') {
+            select('#val-masa').html(`${sliderMasa.value()} kg`);
+        }
+    });
+
+    sliderVol.input(() => {
+        select('#val-volumen').html(`${sliderVol.value()} L`);
+        if (materialPresets.value() !== 'manual') {
+            actualizarMaterialPreset();
+        }
+    });
+
+    sliderLiq.input(() => {
+        select('#val-liq').html(`${sliderLiq.value()} kg/L`);
+        if (liquidPresets.value() !== 'manual') {
+            liquidPresets.value('manual');
+        }
+    });
+
+    materialPresets.changed(() => {
+        refreshMassSliderState();
+        actualizarMaterialPreset();
+    });
+
+    liquidPresets.changed(() => {
+        actualizarLiquidPreset();
+    });
+
+    refreshMassSliderState();
+    actualizarMaterialPreset();
 }
 
 function draw() {
@@ -40,26 +82,22 @@ function draw() {
     liqDensity = parseFloat(sliderLiq.value());
     
     let blockDensity = blockMass / blockVol;
-    let blockSide = map(blockVol, 50, 150, 60, 120); // Mapeo visual del volumen
+    let blockSide = map(blockVol, 50, 150, 62, 120); // Mapeo visual del volumen
     let blockX = tankX + tankW / 2 - blockSide / 2;
 
     // 2. FÍSICA: PRINCIPIO DE ARQUÍMEDES
     let blockBottom = blockY + blockSide;
     let submergedHeight = constrain(blockBottom - liquidLevelY, 0, blockSide);
-    
-    // Proporción sumergida para calcular volumen real bajo el agua
-    let submergedRatio = submergedHeight / blockSide; 
+    let submergedRatio = blockSide > 0 ? submergedHeight / blockSide : 0;
     let submergedVolume = blockVol * submergedRatio;
-    
+
     let weight = blockMass * gravity;
     let buoyancy = submergedVolume * liqDensity * gravity;
-    
     let netForce = weight - buoyancy;
-    
-    velocityY += netForce * 0.1; // dt
-    // Aplicar resistencia solo si está tocando el agua
-    if (submergedHeight > 0) velocityY *= drag; 
-    
+    let acceleration = netForce / max(blockMass, 0.1);
+
+    velocityY += acceleration * motionScale;
+    if (submergedHeight > 0) velocityY *= drag;
     blockY += velocityY;
 
     // Colisión con el fondo del tanque
@@ -68,20 +106,38 @@ function draw() {
         velocityY = 0;
     }
 
+    // Evitar que el bloque suba demasiado fuera del tanque
+    if (blockY < tankY - blockSide * 0.2) {
+        blockY = tankY - blockSide * 0.2;
+        velocityY = 0;
+    }
+
     // 3. ACTUALIZAR PANEL DE DATOS UI
     select('#metric-densidad').html(blockDensity.toFixed(2));
     select('#metric-empuje').html(buoyancy.toFixed(1));
-    
+    select('#metric-porcentaje').html((submergedRatio * 100).toFixed(0));
+    select('#metric-vol-sumergido').html(submergedVolume.toFixed(1));
+
     let estadoUI = select('#metric-estado');
+    const densityRatio = blockDensity / liqDensity;
+    select('#metric-razon').html(densityRatio.toFixed(2));
+
     if (blockDensity > liqDensity) {
         estadoUI.html('Hundiéndose');
         estadoUI.style('color', '#ff4646');
-    } else if (submergedRatio > 0 && submergedRatio < 1 && abs(velocityY) < 0.1) {
+        select('#metric-condicion').html('Densidad mayor');
+    } else if (abs(blockDensity - liqDensity) < 0.05) {
+        estadoUI.html('Equilibrio Neutro');
+        estadoUI.style('color', '#ffd166');
+        select('#metric-condicion').html('Densidades similares');
+    } else if (submergedRatio > 0 && submergedRatio < 1 && abs(velocityY) < 0.12) {
         estadoUI.html('Equilibrio Flotante');
         estadoUI.style('color', '#00ffaa');
+        select('#metric-condicion').html('Densidad menor');
     } else {
         estadoUI.html('Movimiento...');
         estadoUI.style('color', '#00c8ff');
+        select('#metric-condicion').html('A determinar');
     }
 
     // 4. RENDERIZADO MACRO (IZQUIERDA)
@@ -89,6 +145,91 @@ function draw() {
 
     // 5. RENDERIZADO MICRO Y BÁSCULA (DERECHA)
     drawMicro(blockSide);
+}
+
+function actualizarMaterialPreset() {
+    if (!materialPresets || materialPresets.value() === 'manual') return;
+    const densities = {
+        madera: 0.60,
+        plastico: 0.90,
+        aluminio: 2.70,
+        hierro: 7.80
+    };
+    const materialDensity = densities[materialPresets.value()] || 1.0;
+    const currentVolume = parseFloat(sliderVol.value());
+    blockMass = round(materialDensity * currentVolume * 10) / 10;
+
+    sliderMasa.value(blockMass);
+    select('#val-masa').html(`${blockMass.toFixed(1)} kg`);
+}
+
+function actualizarLiquidPreset() {
+    if (!liquidPresets || liquidPresets.value() === 'manual') return;
+    const liquidDensities = {
+        agua: 1.00,
+        aceite: 0.92,
+        alcohol: 0.79,
+        mercurio: 13.56
+    };
+    const selectedDensity = liquidDensities[liquidPresets.value()] || 1.0;
+    liqDensity = selectedDensity;
+    sliderLiq.value(selectedDensity);
+    select('#val-liq').html(`${selectedDensity.toFixed(2)} kg/L`);
+}
+
+function refreshMassSliderState() {
+    if (!sliderMasa || !materialPresets) return;
+    if (materialPresets.value() === 'manual') {
+        sliderMasa.removeAttribute('disabled');
+        sliderMasa.elt.style.opacity = '1';
+    } else {
+        sliderMasa.attribute('disabled', '');
+        sliderMasa.elt.style.opacity = '0.5';
+    }
+}
+
+function toggleSimulation() {
+    if (!playPauseBtn) return;
+    if (simulationActive) {
+        noLoop();
+        simulationActive = false;
+        playPauseBtn.html('▶ Reanudar');
+        playPauseBtn.addClass('estado-pausado');
+    } else {
+        loop();
+        simulationActive = true;
+        playPauseBtn.html('⏸ Pausar');
+        playPauseBtn.removeClass('estado-pausado');
+    }
+}
+
+function resetSimulation() {
+    blockMass = defaultState.mass;
+    blockVol = defaultState.vol;
+    liqDensity = defaultState.liqDensity;
+    blockY = defaultState.blockY;
+    velocityY = defaultState.velocityY;
+
+    sliderMasa.value(blockMass);
+    sliderVol.value(blockVol);
+    sliderLiq.value(liqDensity);
+
+    select('#val-masa').html(`${blockMass} kg`);
+    select('#val-volumen').html(`${blockVol} L`);
+    select('#val-liq').html(`${liqDensity.toFixed(2)} kg/L`);
+
+    materialPresets.value('manual');
+    liquidPresets.value('manual');
+    refreshMassSliderState();
+
+    if (!simulationActive) {
+        loop();
+        simulationActive = true;
+        if (playPauseBtn) {
+            playPauseBtn.html('⏸ Pausar');
+            playPauseBtn.removeClass('estado-pausado');
+        }
+    }
 }
 
 function drawMacro(bx, bSide, subHeight) {

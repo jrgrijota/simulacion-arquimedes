@@ -1,0 +1,358 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #121212;
+    color: #e0e0e0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.app-container {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+}
+
+.control-panel {
+    background-color: #1e1e1e;
+    border-right: 1px solid #2d2d2d;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    height: 100vh;
+    z-index: 2;
+}
+
+header h1 {
+    font-size: 1.3rem;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.subtitle {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 4px;
+}
+
+.divider {
+    border: 0;
+    height: 1px;
+    background: #2d2d2d;
+}
+
+h2 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #00c8ff;
+    margin-bottom: 4px;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.label-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.value-badge {
+    background-color: #2d2d2d;
+    color: #00c8ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.slider-bounds {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #666;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 999px;
+    background: #222;
+    outline: none;
+    accent-color: #00c8ff;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #00c8ff;
+    border: 2px solid #1c1c1c;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #00c8ff;
+    border: 2px solid #1c1c1c;
+    cursor: pointer;
+}
+
+.custom-select {
+    background-color: #252525;
+    border: 1px solid #2d2d2d;
+    color: #ffffff;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    cursor: pointer;
+    outline: none;
+}
+
+.section-note {
+    font-size: 0.82rem;
+    color: #b0b0b0;
+    margin-top: 8px;
+    line-height: 1.4;
+}
+
+.field-hint {
+    font-size: 0.75rem;
+    color: #7a7a7a;
+    line-height: 1.4;
+}
+
+.activity-list {
+    list-style: inside disc;
+    color: #d2d2d2;
+    padding-left: 16px;
+    margin-top: 6px;
+}
+
+.activity-list li {
+    margin-bottom: 6px;
+    font-size: 0.83rem;
+}
+
+.panel-actions {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 5;
+}
+
+.toggle-btn {
+    background-color: #1e1e1e;
+    border: 1px solid #3d3d3d;
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    font-weight: 600;
+}
+
+.toggle-btn:hover {
+    background-color: #262626;
+}
+
+.toggle-btn.estado-pausado {
+    border-color: #00ff88;
+    color: #00ff88;
+    background-color: #112a1e;
+}
+
+.toggle-btn.reset-btn {
+    border-color: #888;
+    color: #ccc;
+}
+
+.custom-details {
+    background-color: #252525;
+    border: 1px solid #2d2d2d;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.custom-details summary {
+    padding: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #a0a0a0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+}
+
+.custom-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.custom-details summary::after {
+    content: '►';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.75rem;
+    color: #555;
+    transition: transform 0.2s ease;
+}
+
+.custom-details[open] summary::after {
+    transform: translateY(-50%) rotate(90deg);
+    color: #00c8ff;
+}
+
+.details-content {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #1a1a1a;
+    border-top: 1px solid #2d2d2d;
+}
+
+.dashboard-static-group.horizontal-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+@media (max-width: 1080px) {
+    .app-container {
+        grid-template-columns: 1fr;
+    }
+    .control-panel {
+        height: auto;
+        width: 100%;
+        position: relative;
+    }
+    .simulation-panel {
+        height: calc(100vh - 360px);
+    }
+}
+
+.card {
+    background-color: #222222;
+    border: 1px solid #2d2d2d;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.card.card-data {
+    background: linear-gradient(135deg, #1d2936 0%, #151e27 100%);
+    border: 1px solid #2c3e50;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.card.Highlight {
+    border-left: 3px solid #00c8ff;
+}
+
+.card h3 {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.metric {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #ffffff;
+    font-family: monospace;
+}
+
+.metric small {
+    font-size: 0.75rem;
+    color: #444;
+}
+
+.metric-secondary {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #888;
+    font-family: monospace;
+}
+
+.simulation-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #141414;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+#canvas-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#canvas-container canvas {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    max-width: 90vh;
+    max-height: 90vh;
+}
+
+.control-panel::-webkit-scrollbar {
+    width: 8px;
+}
+
+.control-panel::-webkit-scrollbar-thumb {
+    background: #2d2d2d;
+    border-radius: 4px;
+}
+
+.control-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+@media (max-width: 1080px) {
+    .app-container {
+        grid-template-columns: 1fr;
+    }
+    .control-panel {
+        height: auto;
+        width: 100%;
+        position: relative;
+    }
+    .simulation-panel {
+        height: calc(100vh - 360px);
+    }
+}
