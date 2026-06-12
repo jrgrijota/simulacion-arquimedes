@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulación: El Laberinto de la Densidad</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="control-panel">
+            <header>
+                <h1>Principio de Arquímedes</h1>
+                <p class="subtitle">Relación Macro-Micro de la Densidad</p>
+            </header>
+            
+            <hr class="divider">
+
+            <section class="control-group">
+                <h2>Propiedades del Bloque</h2>
+                
+                <div class="input-wrapper">
+                    <div class="label-container">
+                        <label>Masa (Cantidad de materia)</label>
+                        <span id="val-masa" class="value-badge">50 kg</span>
+                    </div>
+                    <input type="range" id="slider-masa" min="10" max="200" value="50" step="1">
+                    <div class="slider-bounds">
+                        <span>10 kg</span>
+                        <span>200 kg</span>
+                    </div>
+                </div>
+
+                <div class="input-wrapper">
+                    <div class="label-container">
+                        <label>Volumen (Espacio ocupado)</label>
+                        <span id="val-volumen" class="value-badge">100 L</span>
+                    </div>
+                    <input type="range" id="slider-volumen" min="50" max="150" value="100" step="1">
+                    <div class="slider-bounds">
+                        <span>50 L</span>
+                        <span>150 L</span>
+                    </div>
+                </div>
+            </section>
+
+            <hr class="divider">
+
+            <section class="control-group">
+                <h2>Entorno Hidrostático</h2>
+                <div class="input-wrapper">
+                    <div class="label-container">
+                        <label>Densidad del líquido</label>
+                        <span id="val-liq" class="value-badge">1.00 kg/L</span>
+                    </div>
+                    <input type="range" id="slider-liq" min="0.5" max="2.0" value="1.0" step="0.05">
+                    <div class="slider-bounds">
+                        <span>0.5 (Aceites)</span>
+                        <span>2.0 (Fluidos densos)</span>
+                    </div>
+                </div>
+            </section>
+
+            <hr class="divider">
+
+            <section class="control-group">
+                <h2>Monitorización en Tiempo Real</h2>
+                <div class="dashboard-static-group horizontal-layout">
+                    <div class="card card-data">
+                        <h3>Densidad del Bloque</h3>
+                        <div class="metric"><span id="metric-densidad">0.50</span> <small>kg/L</small></div>
+                    </div>
+                    <div class="card card-data">
+                        <h3>Fuerza de Empuje</h3>
+                        <div class="metric"><span id="metric-empuje">0.0</span> <small>N</small></div>
+                    </div>
+                </div>
+                <div class="card Highlight" style="margin-top: 8px;">
+                    <h3>Estado del Sistema</h3>
+                    <div class="metric-secondary"><span id="metric-estado" style="color: #00c8ff;">Flotando</span></div>
+                </div>
+            </section>
+        </aside>
+
+        <main class="simulation-panel">
+            <div id="canvas-container"></div>
+        </main>
+    </div>
+    <script src="js/sketch.js"></script>
+</body>
+</html>
