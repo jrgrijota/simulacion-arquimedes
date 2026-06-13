@@ -78,6 +78,26 @@ header h1 {
     line-height: 1.5;
 }
 
+/* Regla rápida mnemónica */
+.quick-rule {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 6px;
+}
+
+.quick-rule span {
+    font-size: 0.74rem;
+    font-family: monospace;
+    padding: 3px 8px;
+    border-radius: 5px;
+    display: block;
+}
+
+.qr-float  { color: #55cc80; background: #0b1f10; border: 1px solid #1a4025; }
+.qr-eq     { color: #ccaa40; background: #1a1600; border: 1px solid #403800; }
+.qr-sink   { color: #ee6060; background: #1f0b0b; border: 1px solid #402020; }
+
 /* ── Divisor ──────────────────────────────────────── */
 .divider { border: 0; height: 1px; background: #252525; }
 
@@ -135,15 +155,21 @@ label { font-size: 0.83rem; color: #c0c0c0; }
     color: #555;
 }
 
-/* Slider estilizado */
+/* Slider estilizado con pista de relleno */
 input[type="range"] {
     -webkit-appearance: none;
     width: 100%;
     height: 7px;
     border-radius: 999px;
-    background: linear-gradient(to right, #00c8ff44, #1a1a1a);
+    background: linear-gradient(
+        to right,
+        #00c8ff90 0%,
+        #00c8ff90 var(--fill, 40%),
+        #1e1e1e var(--fill, 40%)
+    );
     outline: none;
     cursor: pointer;
+    transition: background 0.1s;
 }
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;

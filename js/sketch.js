@@ -63,20 +63,24 @@ function setup() {
     sliderMasa.input(() => {
         if (materialPresets.value() === 'manual')
             select('#val-masa').html(`${sliderMasa.value()} kg`);
+        setSliderFill(sliderMasa, 10, 200);
     });
     sliderVol.input(() => {
         select('#val-volumen').html(`${sliderVol.value()} L`);
         if (materialPresets.value() !== 'manual') actualizarMaterialPreset();
+        setSliderFill(sliderVol, 50, 150);
     });
     sliderLiq.input(() => {
         select('#val-liq').html(`${parseFloat(sliderLiq.value()).toFixed(3)} kg/L`);
         liquidPresets.value('manual');
+        setSliderFill(sliderLiq, 0.5, 13.6);
     });
 
     materialPresets.changed(() => { refreshMassSliderState(); actualizarMaterialPreset(); });
     liquidPresets.changed(() => { actualizarLiquidPreset(); });
 
     refreshMassSliderState();
+    refreshSliderFills();
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -160,6 +164,7 @@ function drawMacroView(bX, bSide, subH, subVol, subRatio, buoyancy, weight, bloc
 function drawLiquid() {
     push();
     let lc = liquidColor(liqDensity);
+    // Gradiente de profundidad
     for (let i = 0; i < 42; i++) {
         let t  = i / 42;
         let y0 = lerp(LIQ_Y, TK.y + TK.h, t);
@@ -171,6 +176,14 @@ function drawLiquid() {
         fill(r, g, b, a);
         noStroke();
         rect(TK.x + 3, y0, TK.w - 6, y1 - y0 + 1);
+    }
+    // Marca de agua: nombre del líquido en el fondo del tanque
+    let lname = getLiquidName();
+    if (lname) {
+        noStroke();
+        fill(255, 255, 255, 16);
+        textSize(12); textAlign(CENTER, BOTTOM);
+        text(lname, TK.x + TK.w / 2, TK.y + TK.h - 10);
     }
     pop();
 }
@@ -676,6 +689,18 @@ function drawGraphPanel() {
 // ═══════════════════════════════════════════════════════════════════
 //  FUNCIONES AUXILIARES
 // ═══════════════════════════════════════════════════════════════════
+function setSliderFill(slider, minV, maxV) {
+    if (!slider) return;
+    let pct = ((parseFloat(slider.value()) - minV) / (maxV - minV)) * 100;
+    slider.elt.style.setProperty('--fill', pct.toFixed(1) + '%');
+}
+
+function refreshSliderFills() {
+    setSliderFill(sliderMasa, 10, 200);
+    setSliderFill(sliderVol,  50, 150);
+    setSliderFill(sliderLiq,  0.5, 13.6);
+}
+
 function getLiquidName() {
     if (!liquidPresets) return '';
     const names = {
@@ -772,6 +797,7 @@ function actualizarMaterialPreset() {
     blockMass = constrain(round(d * vol * 10) / 10, 10, 200);
     sliderMasa.value(blockMass);
     select('#val-masa').html(`${blockMass.toFixed(1)} kg`);
+    setSliderFill(sliderMasa, 10, 200);
 }
 
 function actualizarLiquidPreset() {
@@ -789,6 +815,7 @@ function actualizarLiquidPreset() {
     liqDensity = d;
     sliderLiq.value(d);
     select('#val-liq').html(`${d.toFixed(3)} kg/L`);
+    setSliderFill(sliderLiq, 0.5, 13.6);
 }
 
 function refreshMassSliderState() {
