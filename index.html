@@ -3,163 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulación: El Laberinto de la Densidad</title>
+    <title>Principio de Arquímedes — Simulación Interactiva</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="app-container">
+
+        <!-- ── PANEL DE CONTROL ──────────────────────────────────── -->
         <aside class="control-panel">
+
             <header>
+                <div class="header-icon">⚗</div>
                 <h1>Principio de Arquímedes</h1>
-                <p class="subtitle">Relación Macro-Micro de la Densidad</p>
-                <p class="section-note">Ajusta masa, volumen y densidad del líquido para observar cuándo un bloque flota, se hunde o queda en equilibrio.</p>
+                <p class="subtitle">Flotación, Densidad y Empuje</p>
+                <p class="section-note">
+                    Varía masa, volumen y densidad del fluido para descubrir cuándo un cuerpo
+                    flota, se hunde o queda en equilibrio neutro.
+                </p>
+                <div class="quick-rule">
+                    <span class="qr-float">ρ<sub>bl</sub> &lt; ρ<sub>liq</sub> → flota ↑</span>
+                    <span class="qr-eq">ρ<sub>bl</sub> = ρ<sub>liq</sub> → equilibrio ⇌</span>
+                    <span class="qr-sink">ρ<sub>bl</sub> &gt; ρ<sub>liq</sub> → se hunde ↓</span>
+                </div>
             </header>
-            
+
             <hr class="divider">
 
+            <!-- PROPIEDADES DEL BLOQUE -->
             <section class="control-group">
-                <h2>Propiedades del Bloque</h2>
-                
+                <h2>Bloque</h2>
+
                 <div class="input-wrapper">
                     <div class="label-container">
-                        <label>Masa (Cantidad de materia)</label>
+                        <label for="slider-masa">Masa <span class="label-hint">(cantidad de materia)</span></label>
                         <span id="val-masa" class="value-badge">50 kg</span>
                     </div>
                     <input type="range" id="slider-masa" min="10" max="200" value="50" step="1">
-                    <div class="slider-bounds">
-                        <span>10 kg</span>
-                        <span>200 kg</span>
-                    </div>
+                    <div class="slider-bounds"><span>10 kg</span><span>200 kg</span></div>
                 </div>
 
                 <div class="input-wrapper">
                     <div class="label-container">
-                        <label>Volumen (Espacio ocupado)</label>
+                        <label for="slider-volumen">Volumen <span class="label-hint">(espacio que ocupa)</span></label>
                         <span id="val-volumen" class="value-badge">100 L</span>
                     </div>
                     <input type="range" id="slider-volumen" min="50" max="150" value="100" step="1">
-                    <div class="slider-bounds">
-                        <span>50 L</span>
-                        <span>150 L</span>
-                    </div>
+                    <div class="slider-bounds"><span>50 L</span><span>150 L</span></div>
                 </div>
-            </section>
 
-            <hr class="divider">
-
-            <section class="control-group">
-                <h2>Entorno Hidrostático</h2>
                 <div class="input-wrapper">
-                    <div class="label-container">
-                        <label>Densidad del líquido</label>
-                        <span id="val-liq" class="value-badge">1.00 kg/L</span>
-                    </div>
-                    <input type="range" id="slider-liq" min="0.5" max="13.6" value="1.0" step="0.05">
-                    <div class="slider-bounds">
-                        <span>0.5</span>
-                        <span>13.6</span>
-                    </div>
-                </div>
-                <div class="input-wrapper">
-                    <div class="label-container">
-                        <label>Presets de líquido</label>
-                    </div>
-                    <select id="liquid-presets" class="custom-select">
-                        <option value="manual" selected>Personalizado</option>
-                        <option value="agua">Agua (1.00 kg/L)</option>
-                        <option value="aceite">Aceite (0.92 kg/L)</option>
-                        <option value="alcohol">Alcohol (0.79 kg/L)</option>
-                        <option value="mercurio">Mercurio (13.56 kg/L)</option>
-                    </select>
-                    <p class="field-hint">Selecciona un líquido para comparar cómo cambia el empuje.</p>
-                </div>
-            </section>
-
-            <hr class="divider">
-
-            <section class="control-group">
-                <h2>Materiales de referencia</h2>
-                <div class="input-wrapper">
-                    <div class="label-container">
-                        <label>Presets de material</label>
-                    </div>
+                    <label for="material-presets">Material de referencia</label>
                     <select id="material-presets" class="custom-select">
-                        <option value="manual" selected>Personalizado</option>
-                        <option value="madera">Madera sólida (0.60 kg/L)</option>
-                        <option value="plastico">Plástico (0.90 kg/L)</option>
-                        <option value="aluminio">Aluminio (2.70 kg/L)</option>
-                        <option value="hierro">Hierro (7.80 kg/L)</option>
+                        <option value="manual" selected>— Personalizado —</option>
+                        <optgroup label="Flotan en agua">
+                            <option value="corcho">Corcho  (0.24 kg/L)</option>
+                            <option value="madera">Madera  (0.60 kg/L)</option>
+                            <option value="hielo">Hielo   (0.917 kg/L)</option>
+                            <option value="plastico">Plástico (0.95 kg/L)</option>
+                        </optgroup>
+                        <optgroup label="Se hunden en agua">
+                            <option value="aluminio">Aluminio (2.70 kg/L)</option>
+                            <option value="hierro">Hierro   (7.87 kg/L)</option>
+                            <option value="plomo">Plomo    (11.34 kg/L)</option>
+                            <option value="oro">Oro      (19.30 kg/L)</option>
+                        </optgroup>
                     </select>
-                    <p class="field-hint">Selecciona un material para ajustar la masa automáticamente según el volumen desplegado.</p>
+                    <p class="field-hint">La masa se calcula automáticamente: m = ρ × V</p>
                 </div>
             </section>
 
             <hr class="divider">
 
+            <!-- FLUIDO -->
             <section class="control-group">
-                <h2>Monitorización en Tiempo Real</h2>
-                <div class="dashboard-static-group horizontal-layout">
+                <h2>Fluido</h2>
+
+                <div class="input-wrapper">
+                    <div class="label-container">
+                        <label for="slider-liq">Densidad del líquido</label>
+                        <span id="val-liq" class="value-badge">1.000 kg/L</span>
+                    </div>
+                    <input type="range" id="slider-liq" min="0.5" max="13.6" value="1.0" step="0.01">
+                    <div class="slider-bounds"><span>0.50</span><span>13.60 kg/L</span></div>
+                </div>
+
+                <div class="input-wrapper">
+                    <label for="liquid-presets">Fluidos reales</label>
+                    <select id="liquid-presets" class="custom-select">
+                        <option value="manual" selected>— Personalizado —</option>
+                        <optgroup label="Menos densos que el agua">
+                            <option value="gasolina">Gasolina   (0.740 kg/L)</option>
+                            <option value="alcohol">Etanol     (0.789 kg/L)</option>
+                            <option value="aceite">Aceite     (0.920 kg/L)</option>
+                        </optgroup>
+                        <optgroup label="Agua y soluciones acuosas">
+                            <option value="aguadulce">Agua dulce  (1.000 kg/L)</option>
+                            <option value="aguamar">Agua de mar (1.025 kg/L)</option>
+                            <option value="glicerina">Glicerina   (1.261 kg/L)</option>
+                        </optgroup>
+                        <optgroup label="Muy densos">
+                            <option value="mercurio">Mercurio    (13.534 kg/L)</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </section>
+
+            <hr class="divider">
+
+            <!-- MÉTRICAS EN TIEMPO REAL -->
+            <section class="control-group">
+                <h2>Monitorización en tiempo real</h2>
+
+                <div class="metrics-grid">
                     <div class="card card-data">
-                        <h3>Densidad del Bloque</h3>
-                        <div class="metric"><span id="metric-densidad">0.50</span> <small>kg/L</small></div>
+                        <h3>Dens. bloque</h3>
+                        <div class="metric">
+                            <span id="metric-densidad">0.50</span>
+                            <small>kg/L</small>
+                        </div>
                     </div>
                     <div class="card card-data">
-                        <h3>Fuerza de Empuje</h3>
-                        <div class="metric"><span id="metric-empuje">0.0</span> <small>N</small></div>
+                        <h3>Peso (P)</h3>
+                        <div class="metric">
+                            <span id="metric-peso">490.0</span>
+                            <small>N</small>
+                        </div>
+                    </div>
+                    <div class="card card-data">
+                        <h3>Empuje (E)</h3>
+                        <div class="metric">
+                            <span id="metric-empuje">0.0</span>
+                            <small>N</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metrics-grid">
+                    <div class="card card-data">
+                        <h3>Fuerza neta</h3>
+                        <div class="metric">
+                            <span id="metric-fneta">0.0</span>
+                            <small>N</small>
+                        </div>
                     </div>
                     <div class="card card-data">
                         <h3>Sumergido</h3>
-                        <div class="metric"><span id="metric-porcentaje">0</span> <small>%</small></div>
+                        <div class="metric">
+                            <span id="metric-porcentaje">0</span>
+                            <small>%</small>
+                        </div>
+                    </div>
+                    <div class="card card-data">
+                        <h3>Vol. sumergido</h3>
+                        <div class="metric">
+                            <span id="metric-vol-sumergido">0.0</span>
+                            <small>L</small>
+                        </div>
                     </div>
                 </div>
-                <div class="dashboard-static-group horizontal-layout">
-                    <div class="card card-data">
-                        <h3>Volumen sumergido</h3>
-                        <div class="metric"><span id="metric-vol-sumergido">0.0</span> <small>L</small></div>
+
+                <div class="card card-estado">
+                    <div class="estado-header">
+                        <h3>Estado del sistema</h3>
+                        <span id="metric-estado" class="estado-value">—</span>
                     </div>
-                    <div class="card card-data">
-                        <h3>Relación de Densidades</h3>
-                        <div class="metric"><span id="metric-razon">0.00</span> <small></small></div>
+
+                    <!-- Barras de comparación visual de densidades -->
+                    <div class="density-compare">
+                        <div class="dcol">
+                            <div class="dbar-outer">
+                                <div id="bar-block" class="dbar-inner dbar-block" style="height:50%"></div>
+                            </div>
+                            <div id="dval-block" class="dbar-val">0.50</div>
+                            <div class="dbar-lbl">ρ bloque</div>
+                        </div>
+                        <div class="dcol dcol-vs">vs</div>
+                        <div class="dcol">
+                            <div class="dbar-outer">
+                                <div id="bar-liquid" class="dbar-inner dbar-liquid" style="height:50%"></div>
+                            </div>
+                            <div id="dval-liquid" class="dbar-val">1.00</div>
+                            <div class="dbar-lbl">ρ fluido</div>
+                        </div>
+                        <div class="dcol">
+                            <div class="razon-col">
+                                <div class="razon-lbl">ρ<sub>bl</sub>/ρ<sub>liq</sub></div>
+                                <div id="metric-razon" class="razon-big">0.500</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card card-data">
-                        <h3>Condición</h3>
-                        <div class="metric-secondary"><span id="metric-condicion">Indefinido</span></div>
-                    </div>
-                </div>
-                <div class="card Highlight" style="margin-top: 8px;">
-                    <h3>Estado del Sistema</h3>
-                    <div class="metric-secondary"><span id="metric-estado" style="color: #00c8ff;">Flotando</span></div>
+
+                    <div id="metric-condicion" class="condicion-badge">—</div>
                 </div>
             </section>
 
+            <hr class="divider">
+
+            <!-- CONTENIDO EDUCATIVO -->
             <details class="custom-details">
                 <summary>Conceptos clave y retos</summary>
                 <div class="details-content">
-                    <div class="card">
+
+                    <div class="card edu-card">
+                        <h3>Regla de oro</h3>
+                        <div class="rule-grid">
+                            <div class="rule-item rule-float">
+                                <span class="rule-icon">↑</span>
+                                <span>ρ<sub>bloque</sub> &lt; ρ<sub>fluido</sub> → Flota</span>
+                            </div>
+                            <div class="rule-item rule-sink">
+                                <span class="rule-icon">↓</span>
+                                <span>ρ<sub>bloque</sub> &gt; ρ<sub>fluido</sub> → Se hunde</span>
+                            </div>
+                            <div class="rule-item rule-neutral">
+                                <span class="rule-icon">⇌</span>
+                                <span>ρ<sub>bloque</sub> = ρ<sub>fluido</sub> → Equilibrio neutro</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card edu-card">
                         <h3>Fórmulas esenciales</h3>
-                        <p class="field-hint">Densidad = masa / volumen</p>
-                        <p class="field-hint">Empuje = densidad líquido × g × volumen sumergido</p>
+                        <div class="formula-list">
+                            <div class="formula">
+                                <span class="formula-name">Densidad:</span>
+                                <span class="formula-eq">ρ = m / V</span>
+                            </div>
+                            <div class="formula">
+                                <span class="formula-name">Empuje:</span>
+                                <span class="formula-eq">E = ρ<sub>f</sub> · g · V<sub>sub</sub></span>
+                            </div>
+                            <div class="formula">
+                                <span class="formula-name">Peso:</span>
+                                <span class="formula-eq">P = m · g</span>
+                            </div>
+                            <div class="formula">
+                                <span class="formula-name">Equilibrio:</span>
+                                <span class="formula-eq">E = P  →  V<sub>sub</sub>/V = ρ<sub>bl</sub>/ρ<sub>f</sub></span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card">
-                        <h3>Trabajo para Secundaria</h3>
-                        <ul class="activity-list">
-                            <li>Compara materiales y predice si flotan.</li>
-                            <li>Observa cómo cambia la profundidad al variar la densidad del líquido.</li>
-                            <li>Explica por qué la fuerza de empuje depende del volumen sumergido.</li>
-                        </ul>
+
+                    <div class="card edu-card">
+                        <h3>Retos por nivel</h3>
+                        <div class="reto-list">
+                            <div class="reto reto-basico">
+                                <span class="reto-tag">Básico</span>
+                                <p>Prueba cada material de la lista. ¿Cuáles flotan en agua? ¿Coincide con tu predicción?</p>
+                            </div>
+                            <div class="reto reto-medio">
+                                <span class="reto-tag">Intermedio</span>
+                                <p>Con el bloque de hierro en agua, ¿qué densidad de fluido necesitas para que empiece a flotar? Compruébalo con el slider.</p>
+                            </div>
+                            <div class="reto reto-medio">
+                                <span class="reto-tag">Intermedio</span>
+                                <p>El hielo flota en agua con el 91.7% sumergido. Verifica esta proporción con la fórmula V<sub>sub</sub>/V = ρ<sub>hielo</sub>/ρ<sub>agua</sub>.</p>
+                            </div>
+                            <div class="reto reto-avanzado">
+                                <span class="reto-tag">Avanzado</span>
+                                <p>Observa la gráfica. ¿Qué ocurre con la fuerza de empuje cuando el bloque llega al equilibrio? Explica por qué las dos curvas convergen.</p>
+                            </div>
+                            <div class="reto reto-avanzado">
+                                <span class="reto-tag">Avanzado</span>
+                                <p>Un submarino regula su inmersión variando su densidad media (tanques de lastre). ¿Cómo lo reproducirías en esta simulación?</p>
+                            </div>
+                        </div>
                     </div>
+
+                    <div class="card edu-card curiosidad">
+                        <h3>¿Lo sabías?</h3>
+                        <p class="field-hint">
+                            El Mar Muerto tiene una densidad de ~1.24 kg/L gracias a su alta salinidad.
+                            Una persona con densidad ≈0.95 kg/L flota con el 77% del cuerpo sumergido —
+                            ¡por eso es tan difícil hundirse en él!
+                        </p>
+                    </div>
+
                 </div>
             </details>
+
         </aside>
 
+        <!-- ── PANEL DE SIMULACIÓN ───────────────────────────────── -->
         <main class="simulation-panel">
             <div class="panel-actions">
-                <button id="play-pause-btn" class="toggle-btn play-btn" onclick="toggleSimulation()">⏸ Pausar</button>
-                <button id="reset-btn" class="toggle-btn reset-btn" onclick="resetSimulation()">↺ Restablecer</button>
+                <button id="play-pause-btn" class="toggle-btn play-btn" onclick="toggleSimulation()">
+                    &#9646;&#9646; Pausar
+                </button>
+                <button id="reset-btn" class="toggle-btn reset-btn" onclick="resetSimulation()">
+                    &#8635; Restablecer
+                </button>
             </div>
             <div id="canvas-container"></div>
         </main>
+
     </div>
     <script src="js/sketch.js"></script>
 </body>
