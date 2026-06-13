@@ -445,8 +445,7 @@ input[type="range"]:disabled { cursor: not-allowed; }
 #canvas-container canvas {
     box-shadow: 0 16px 48px rgba(0,0,0,0.65), 0 0 0 1px #252525;
     border-radius: 10px;
-    max-width: 92vh;
-    max-height: 92vh;
+    display: block;
 }
 
 /* ════════════════════════════════════════════════════
@@ -614,10 +613,26 @@ input[type="range"]:disabled { cursor: not-allowed; }
 @media (max-width: 1100px) {
     .app-container { grid-template-columns: 1fr; }
     body { overflow: auto; }
-    .control-panel { height: auto; width: 100%; }
-    .simulation-panel { height: 60vh; }
+    .control-panel { height: auto; width: 100%; overflow-y: visible; }
+    .simulation-panel {
+        height: 60vw;   /* 60% of viewport width keeps 900:560 ratio (≈62.2vw) */
+        min-height: 220px;
+        max-height: 80vh;
+        order: -1;      /* simulation above controls on mobile */
+    }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 640px) {
+    .panel-actions { top: 8px; left: 8px; gap: 6px; }
+    .toggle-btn { padding: 6px 10px; font-size: 0.80rem; }
     .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .header-icon { font-size: 1.3rem; }
+    header h1 { font-size: 1.05rem; }
+}
+
+@media (max-width: 400px) {
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .control-panel { padding: 12px 12px; }
+    .card h3 { font-size: 0.62rem; }
+    .metric { font-size: 1.05rem; }
 }

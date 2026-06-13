@@ -81,6 +81,7 @@ function setup() {
 
     refreshMassSliderState();
     refreshSliderFills();
+    scaleCanvas();
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -833,6 +834,19 @@ function refreshMassSliderState() {
         sliderMasa.attribute('disabled', '');
         sliderMasa.elt.style.opacity = '0.5';
     }
+}
+
+function scaleCanvas() {
+    let c = document.querySelector('#canvas-container canvas');
+    let container = document.getElementById('canvas-container');
+    if (!c || !container) return;
+    let s = Math.min(container.clientWidth / CV_W, container.clientHeight / CV_H, 1);
+    c.style.width  = Math.floor(CV_W * s) + 'px';
+    c.style.height = Math.floor(CV_H * s) + 'px';
+}
+
+function windowResized() {
+    scaleCanvas();
 }
 
 function toggleSimulation() {
