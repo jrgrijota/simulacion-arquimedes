@@ -288,6 +288,12 @@ function drawBlock(bX, bSide, subH, blockDens) {
         line(bX - 5, blockY + emergedH, bX + bSide + 5, blockY + emergedH);
     }
 
+    // Masa dentro del bloque (si es suficientemente grande)
+    if (bSide > 76) {
+        noStroke(); fill(255, 255, 255, 50); textSize(9.5); textAlign(CENTER, CENTER);
+        text(`${blockMass.toFixed(0)} kg`, bX + bSide / 2, blockY + bSide / 2);
+    }
+
     // Etiqueta de densidad sobre el bloque
     noStroke();
     let dCol = blockDens > liqDensity * 1.03 ? color(255, 90, 90) :
@@ -318,20 +324,26 @@ function drawDensityBar(blockDens) {
     let liqMY = map(constrain(liqDensity, minD, maxD), minD, maxD, SC.y, SC.y + SC.h);
     stroke('#ffffff'); strokeWeight(1.5); fill('#ffffff');
     triangle(SC.x + SC.w + 2, liqMY,
-             SC.x + SC.w + 10, liqMY - 5,
-             SC.x + SC.w + 10, liqMY + 5);
-    noStroke(); fill('#ffffffcc'); textSize(8); textAlign(LEFT, CENTER);
-    text(liqDensity.toFixed(2), SC.x + SC.w + 13, liqMY);
+             SC.x + SC.w + 9, liqMY - 5,
+             SC.x + SC.w + 9, liqMY + 5);
 
-    // Marcador del bloque (triángulo izquierda, rojo/verde)
+    // Marcador del bloque (triángulo también derecha, debajo del de fluido)
     let blkMY = map(constrain(blockDens, minD, maxD), minD, maxD, SC.y, SC.y + SC.h);
-    let mCol = blockDens > liqDensity ? color(255, 90, 90) : color(80, 220, 140);
+    let mCol  = blockDens > liqDensity ? color(255, 100, 100) : color(80, 220, 140);
     stroke(mCol); strokeWeight(1.5); fill(mCol);
-    triangle(SC.x - 2, blkMY,
-             SC.x - 10, blkMY - 5,
-             SC.x - 10, blkMY + 5);
-    noStroke(); fill(mCol); textAlign(RIGHT, CENTER);
-    text(blockDens.toFixed(2), SC.x - 13, blkMY);
+    triangle(SC.x + SC.w + 2, blkMY,
+             SC.x + SC.w + 9, blkMY - 5,
+             SC.x + SC.w + 9, blkMY + 5);
+
+    // Etiquetas (evitamos solapamiento con offset dinámico)
+    let nearEq = abs(liqMY - blkMY) < 13;
+    let liqLY  = nearEq ? liqMY - 7 : liqMY;
+    let blkLY  = nearEq ? blkMY + 7 : blkMY;
+
+    noStroke(); fill('#ffffffcc'); textSize(7); textAlign(LEFT, CENTER);
+    text(liqDensity.toFixed(2), SC.x + SC.w + 12, liqLY);
+    fill(mCol);
+    text(blockDens.toFixed(2), SC.x + SC.w + 12, blkLY);
 
     // Título de la escala
     push();
@@ -370,11 +382,18 @@ function drawMacroAnnotations(bX, bSide, subH, subVol, subRatio, buoyancy, weigh
     line(SC.x + SC.w + 12, LIQ_Y, TK.x - 6, LIQ_Y);
     drawingContext.setLineDash([]);
 
-    // Fórmulas dinámicas bajo el tanque
-    noStroke(); fill('#555'); textSize(8.5); textAlign(LEFT, TOP);
-    text(`P = m·g  =  ${blockMass.toFixed(1)} kg × 9.8  =  ${weight.toFixed(0)} N`, TK.x, TK.y + TK.h + 12);
-    fill('#00c8ff66');
-    text(`E = Vₛᵘᵇ·ρₗ·g = ${subVol.toFixed(1)} L × ${liqDensity.toFixed(2)} × 9.8 = ${buoyancy.toFixed(0)} N`, TK.x, TK.y + TK.h + 26);
+    // Fórmulas dinámicas bajo el tanque (ASCII para máxima compatibilidad)
+    noStroke(); fill('#777'); textSize(8.5); textAlign(LEFT, TOP);
+    text(`P = m·g = ${blockMass.toFixed(1)} × 9.8 = ${weight.toFixed(0)} N`, TK.x, TK.y + TK.h + 12);
+    fill('#00bcd4cc');
+    text(`E = V_sub·rho·g = ${subVol.toFixed(1)} × ${liqDensity.toFixed(2)} × 9.8 = ${buoyancy.toFixed(0)} N`, TK.x, TK.y + TK.h + 27);
+
+    // Nombre del líquido si hay preset seleccionado
+    let lname = getLiquidName();
+    if (lname) {
+        fill('#607888'); textSize(8); textAlign(LEFT, TOP);
+        text(`Fluido: ${lname}`, TK.x, TK.y + TK.h + 43);
+    }
 
     pop();
 }
@@ -433,26 +452,79 @@ function drawFBDPanel(weight, buoyancy, netForce) {
         text('neta',   sx + 8, cy - fnDir * 2);
     }
 
-    // Leyenda de colores de flechas
-    let lx = FBD.x + FBD.w - 145, ly = FBD.y + 12;
-    noStroke(); fill(255, 90, 90); textSize(9); textAlign(LEFT, TOP);
-    rect(lx, ly + 2, 14, 4, 1); fill('#ccc'); text('Peso (P)', lx + 18, ly);
-    fill(0, 200, 255);
-    rect(lx, ly + 16, 14, 4, 1); fill('#ccc'); text('Empuje (E)', lx + 18, ly + 14);
-
-    // Ecuación de equilibrio
+    // Ecuación de equilibrio (centrada bajo el bloque)
     let eqText = `P ${netForce > 3 ? '>' : netForce < -3 ? '<' : '≈'} E`;
     let eqCol  = netForce > 3 ? color(255, 90, 90) :
                  netForce < -3 ? color(0, 210, 120) : color(255, 205, 50);
-    noStroke(); fill(eqCol); textSize(14); textAlign(CENTER, BOTTOM);
-    text(eqText, cx, FBD.y + FBD.h - 28);
-
-    // Estado textual
+    noStroke(); fill(eqCol); textSize(15); textAlign(CENTER, BOTTOM);
+    text(eqText, cx, FBD.y + FBD.h - 26);
     let estado = computeEstado();
-    fill(estado.col); textSize(10); textAlign(CENTER, BOTTOM);
-    text(estado.label, cx, FBD.y + FBD.h - 12);
+    fill(estado.col); textSize(9.5); textAlign(CENTER, BOTTOM);
+    text(estado.label, cx, FBD.y + FBD.h - 10);
+
+    // Franja de cálculo numérico (panel derecho del FBD)
+    drawFBDCalculation(weight, buoyancy, netForce);
 
     pop();
+}
+
+function drawFBDCalculation(weight, buoyancy, netForce) {
+    let px = FBD.x + FBD.w * 0.60;
+    let py = FBD.y + 26;
+    let pw = FBD.w * 0.38;
+    let ph = FBD.h - 36;
+
+    // Fondo semitransparente
+    noStroke(); fill(8, 16, 26, 210);
+    rect(px, py, pw, ph, 6);
+
+    // Título
+    fill('#4a6070'); textSize(8); textAlign(LEFT, TOP);
+    text('CÁLCULO', px + 10, py + 8);
+
+    let tx = px + 10;
+    let ty = py + 22;
+    let ls = 13;
+
+    // V_sub a partir del empuje: V_sub = E / (rho × g)
+    let vSub = liqDensity > 0 ? buoyancy / (liqDensity * G) : 0;
+
+    // ── Peso ──
+    fill(255, 100, 100); textSize(8.5); textAlign(LEFT, TOP);
+    text('Peso:', tx, ty); ty += ls;
+    fill('#aaa');
+    text(`P = m·g`, tx + 4, ty); ty += ls;
+    text(`  = ${blockMass.toFixed(1)}×9.8`, tx + 4, ty); ty += ls;
+    fill(255, 160, 160);
+    text(`  = ${weight.toFixed(1)} N`, tx + 4, ty); ty += ls + 2;
+
+    stroke('#203040'); strokeWeight(0.8);
+    line(px + 8, ty, px + pw - 8, ty);
+    ty += 6;
+
+    // ── Empuje ──
+    noStroke(); fill(0, 200, 255); textSize(8.5); textAlign(LEFT, TOP);
+    text('Empuje:', tx, ty); ty += ls;
+    fill('#aaa');
+    text(`E = Vs·ρ·g`, tx + 4, ty); ty += ls;
+    text(`  = ${vSub.toFixed(1)}×${liqDensity.toFixed(2)}×9.8`, tx + 4, ty); ty += ls;
+    fill(120, 220, 255);
+    text(`  = ${buoyancy.toFixed(1)} N`, tx + 4, ty); ty += ls + 2;
+
+    stroke('#203040'); strokeWeight(0.8);
+    line(px + 8, ty, px + pw - 8, ty);
+    ty += 6;
+
+    // ── Fuerza neta ──
+    let fnCol = netForce > 3  ? color(255, 195, 40) :
+                netForce < -3 ? color(80, 255, 155)  : color(180, 180, 180);
+    noStroke(); fill(fnCol); textSize(8.5); textAlign(LEFT, TOP);
+    text('Fuerza neta:', tx, ty); ty += ls;
+    fill('#aaa');
+    text(`Fn = P - E`, tx + 4, ty); ty += ls;
+    let fnDir = netForce > 3 ? ' ↓' : netForce < -3 ? ' ↑' : ' ⇌';
+    fill(fnCol);
+    text(`  = ${netForce.toFixed(1)} N${fnDir}`, tx + 4, ty);
 }
 
 function drawFBDArrow(x, y, dx, dy, col, label, labelUp) {
@@ -577,6 +649,19 @@ function drawGraphPanel() {
     stroke('#ffffff18'); strokeWeight(1);
     line(curX, gy, curX, gy + gh);
 
+    // Línea de equilibrio horizontal (E = P)
+    if (histW.length > 0) {
+        let eqVal = histW[histW.length - 1];  // el peso actual (constante)
+        let eqPy  = map(eqVal, 0, maxV, gy + gh, gy);
+        drawingContext.setLineDash([5, 6]);
+        stroke(255, 255, 255, 32);
+        strokeWeight(1.2);
+        line(gx, eqPy, gx + gw, eqPy);
+        drawingContext.setLineDash([]);
+        noStroke(); fill(255, 255, 255, 40); textSize(7.5); textAlign(LEFT, BOTTOM);
+        text('E = P', gx + 4, eqPy - 2);
+    }
+
     // Leyenda
     noStroke();
     fill(255, 90, 90); rect(gx + gw - 112, gy + 5, 12, 4, 1);
@@ -591,6 +676,16 @@ function drawGraphPanel() {
 // ═══════════════════════════════════════════════════════════════════
 //  FUNCIONES AUXILIARES
 // ═══════════════════════════════════════════════════════════════════
+function getLiquidName() {
+    if (!liquidPresets) return '';
+    const names = {
+        gasolina: 'Gasolina', alcohol: 'Etanol (alcohol)',
+        aceite: 'Aceite vegetal', aguadulce: 'Agua dulce',
+        aguamar: 'Agua de mar', glicerina: 'Glicerina', mercurio: 'Mercurio'
+    };
+    return names[liquidPresets.value()] || '';
+}
+
 function liquidColor(d) {
     if (d < 0.78)  return color(180, 140, 60, 160);   // gasolina / alcohol (ambarino)
     if (d < 0.95)  return color(120, 80, 20, 165);    // aceite (marrón cálido)
