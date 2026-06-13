@@ -432,7 +432,7 @@ function drawFBDPanel(weight, buoyancy, netForce) {
 
     // Bloque central del diagrama
     let cx = FBD.x + FBD.w * 0.38;
-    let cy = FBD.y + FBD.h * 0.46;   // ligeramente arriba del centro para dejar espacio a las flechas
+    let cy = FBD.y + FBD.h * 0.50;   // centrado vertical — suficiente margen para flechas y etiquetas
     let bW = 72, bH = 54;
 
     stroke('#00c8ff55'); strokeWeight(2); fill('#182432');
@@ -443,7 +443,7 @@ function drawFBDPanel(weight, buoyancy, netForce) {
 
     // Escala de flechas proporcional
     let maxF  = max(weight, buoyancy, 1);
-    let maxPx = 76;
+    let maxPx = 70;   // reducido para que etiquetas quepan en los márgenes del panel
 
     // Empuje ↑ (cyan)
     if (buoyancy > 0.5) {
@@ -493,13 +493,13 @@ function drawFBDCalculation(weight, buoyancy, netForce) {
     let pw = FBD.w * 0.38;
     let ph = FBD.h - 36;
 
-    // Fondo semitransparente
-    noStroke(); fill(8, 16, 26, 210);
+    // Fondo con borde sutil
+    stroke('#1e3048'); strokeWeight(1); fill(10, 20, 32, 215);
     rect(px, py, pw, ph, 6);
 
     // Título
-    fill('#4a6070'); textSize(8); textAlign(LEFT, TOP);
-    text('CÁLCULO', px + 10, py + 8);
+    noStroke(); fill('#3d5870'); textSize(8); textAlign(LEFT, TOP);
+    text('PASO A PASO', px + 10, py + 8);
 
     let tx = px + 10;
     let ty = py + 22;
