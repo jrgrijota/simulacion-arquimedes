@@ -713,11 +713,29 @@ function updateUI(blockDens, buoyancy, weight, netForce, subRatio, subVol) {
     select('#metric-razon').html((blockDens / liqDensity).toFixed(3));
     select('#metric-fneta').html(netForce.toFixed(1));
 
-    let estado = computeEstado();
-    let col    = `rgb(${red(estado.col)},${green(estado.col)},${blue(estado.col)})`;
-    let bd     = blockMass / blockVol;
-    let r      = bd / liqDensity;
+    // Barras de comparación de densidades
+    let maxD = max(blockDens, liqDensity, 0.5);
+    let pctB = min((blockDens / maxD) * 100, 100);
+    let pctL = min((liqDensity  / maxD) * 100, 100);
+    let barB = document.getElementById('bar-block');
+    let barL = document.getElementById('bar-liquid');
+    let valB = document.getElementById('dval-block');
+    let valL = document.getElementById('dval-liquid');
+    if (barB) {
+        barB.style.height = pctB + '%';
+        barB.style.background = blockDens > liqDensity * 1.03
+            ? 'linear-gradient(0deg,#993030,#ff7070)'
+            : blockDens < liqDensity * 0.97
+                ? 'linear-gradient(0deg,#205020,#50d050)'
+                : 'linear-gradient(0deg,#806020,#ffc832)';
+    }
+    if (barL)  barL.style.height = pctL + '%';
+    if (valB)  valB.textContent   = blockDens.toFixed(2);
+    if (valL)  valL.textContent   = liqDensity.toFixed(3);
 
+    // Estado del sistema
+    let bd = blockMass / blockVol;
+    let r  = bd / liqDensity;
     let estadoEl = select('#metric-estado');
     let condEl   = select('#metric-condicion');
 

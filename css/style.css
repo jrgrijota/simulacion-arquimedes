@@ -239,13 +239,13 @@ input[type="range"]:disabled { cursor: not-allowed; }
     margin-top: 2px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
-.estado-row {
+.estado-header {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .estado-value {
@@ -254,24 +254,101 @@ input[type="range"]:disabled { cursor: not-allowed; }
     font-family: monospace;
     color: #00c8ff;
     display: block;
-    margin-top: 2px;
     transition: color 0.4s ease;
 }
 
-.razon-box { text-align: right; }
-.razon-value {
+/* Comparación visual de densidades */
+.density-compare {
+    display: flex;
+    gap: 6px;
+    align-items: flex-end;
+    height: 90px;
+}
+
+.dcol {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    height: 100%;
+    justify-content: flex-end;
+}
+
+.dcol-vs {
+    flex: 0 0 20px;
+    font-size: 0.70rem;
+    color: #444;
+    padding-bottom: 28px;
+    text-align: center;
+}
+
+.dbar-outer {
+    width: 100%;
+    flex: 1;
+    background: #151515;
+    border-radius: 5px;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    border: 1px solid #2a2a2a;
+}
+
+.dbar-inner {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    transition: height 0.25s ease, background 0.4s ease;
+    min-height: 2px;
+}
+
+.dbar-block  { background: linear-gradient(0deg, #993030, #ff7070); }
+.dbar-liquid { background: linear-gradient(0deg, #006090, #00c8ff); }
+
+.dbar-val {
+    font-family: monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #888;
+    white-space: nowrap;
+}
+
+.dbar-lbl {
+    font-size: 0.63rem;
+    color: #505060;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Columna de razón de densidades */
+.razon-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 4px;
+    padding-bottom: 20px;
+}
+
+.razon-lbl {
+    font-size: 0.65rem;
+    color: #505060;
+    text-align: center;
+}
+
+.razon-big {
+    font-family: monospace;
     font-size: 1.1rem;
     font-weight: 700;
-    font-family: monospace;
-    color: #a0b8cc;
-    display: block;
+    color: #90a8bc;
+    text-align: center;
 }
 
 .condicion-badge {
     font-size: 0.80rem;
     font-family: monospace;
     color: #607080;
-    padding: 3px 0;
+    padding: 2px 0;
     transition: color 0.4s ease;
 }
 

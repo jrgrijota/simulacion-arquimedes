@@ -159,16 +159,36 @@
                 </div>
 
                 <div class="card card-estado">
-                    <div class="estado-row">
-                        <div>
-                            <h3>Estado del sistema</h3>
-                            <span id="metric-estado" class="estado-value">—</span>
+                    <div class="estado-header">
+                        <h3>Estado del sistema</h3>
+                        <span id="metric-estado" class="estado-value">—</span>
+                    </div>
+
+                    <!-- Barras de comparación visual de densidades -->
+                    <div class="density-compare">
+                        <div class="dcol">
+                            <div class="dbar-outer">
+                                <div id="bar-block" class="dbar-inner dbar-block" style="height:50%"></div>
+                            </div>
+                            <div id="dval-block" class="dbar-val">0.50</div>
+                            <div class="dbar-lbl">ρ bloque</div>
                         </div>
-                        <div class="razon-box">
-                            <h3>ρ<sub>bl</sub> / ρ<sub>liq</sub></h3>
-                            <span id="metric-razon" class="razon-value">0.500</span>
+                        <div class="dcol dcol-vs">vs</div>
+                        <div class="dcol">
+                            <div class="dbar-outer">
+                                <div id="bar-liquid" class="dbar-inner dbar-liquid" style="height:50%"></div>
+                            </div>
+                            <div id="dval-liquid" class="dbar-val">1.00</div>
+                            <div class="dbar-lbl">ρ fluido</div>
+                        </div>
+                        <div class="dcol">
+                            <div class="razon-col">
+                                <div class="razon-lbl">ρ<sub>bl</sub>/ρ<sub>liq</sub></div>
+                                <div id="metric-razon" class="razon-big">0.500</div>
+                            </div>
                         </div>
                     </div>
+
                     <div id="metric-condicion" class="condicion-badge">—</div>
                 </div>
             </section>
