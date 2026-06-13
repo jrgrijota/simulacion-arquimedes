@@ -348,10 +348,14 @@ function drawDensityBar(blockDens) {
              SC.x + SC.w + 9, blkMY - 5,
              SC.x + SC.w + 9, blkMY + 5);
 
-    // Etiquetas (evitamos solapamiento con offset dinámico)
+    // Etiquetas con offset dinámico para evitar solapamiento
     let nearEq = abs(liqMY - blkMY) < 13;
-    let liqLY  = nearEq ? liqMY - 7 : liqMY;
-    let blkLY  = nearEq ? blkMY + 7 : blkMY;
+    let liqLY = liqMY, blkLY = blkMY;
+    if (nearEq) {
+        // Mantenemos el orden relativo de los marcadores
+        if (liqMY <= blkMY) { liqLY = liqMY - 7;  blkLY = blkMY + 7; }
+        else                  { liqLY = liqMY + 7;  blkLY = blkMY - 7; }
+    }
 
     noStroke(); fill('#ffffffcc'); textSize(7); textAlign(LEFT, CENTER);
     text(liqDensity.toFixed(2), SC.x + SC.w + 12, liqLY);
@@ -378,14 +382,16 @@ function drawMacroAnnotations(bX, bSide, subH, subVol, subRatio, buoyancy, weigh
     push();
     let emergedH = bSide - subH;
 
-    // Indicador de % sumergido (lateral izquierdo del tanque)
-    if (subRatio > 0.02 && subRatio < 0.99) {
+    // Indicador de % sumergido (brace lateral izquierda del tanque)
+    if (subRatio > 0.01) {
         let midSub = blockY + emergedH + subH / 2;
         drawingContext.setLineDash([3, 4]);
         stroke('#00c8ff44'); strokeWeight(1);
         line(TK.x - 5, blockY + emergedH, TK.x - 5, blockY + bSide);
         drawingContext.setLineDash([]);
-        noStroke(); fill('#00c8ff99'); textSize(9); textAlign(RIGHT, CENTER);
+        noStroke();
+        fill(subRatio > 0.99 ? '#ff7070' : '#00c8ff99');
+        textSize(9); textAlign(RIGHT, CENTER);
         text(`${(subRatio * 100).toFixed(0)}%`, TK.x - 8, midSub);
     }
 
@@ -859,6 +865,7 @@ function resetSimulation() {
     materialPresets.value('manual');
     liquidPresets.value('manual');
     refreshMassSliderState();
+    refreshSliderFills();
 
     if (!simulationActive) {
         loop(); simulationActive = true;
