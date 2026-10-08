@@ -507,8 +507,9 @@ function drawBlock(bX, bSide, subH, blockDens) {
 
     // Etiqueta de densidad sobre el bloque
     noStroke();
-    let dCol = blockDens > liqDensity * 1.03 ? color(255, 90, 90) :
-               blockDens < liqDensity * 0.97 ? color(0, 215, 120) :
+    let cmp  = compararDensidades();
+    let dCol = cmp > 0 ? color(255, 90, 90) :
+               cmp < 0 ? color(0, 215, 120) :
                color(255, 205, 50);
     fill(dCol);
     textSize(12); textAlign(CENTER, BOTTOM);
@@ -807,12 +808,22 @@ function liquidColor(d) {
     return         color(155, 162, 172, 235);         // mercurio (plateado metálico)
 }
 
+// Compara densidades: 1 si el bloque es más denso (se hunde), −1 si menos (flota),
+// 0 si son iguales. La tolerancia (0,1 %) solo absorbe el redondeo de los
+// deslizadores: con cualquier diferencia apreciable el bloque se mueve.
+const EQ_TOL = 0.001;
+function compararDensidades() {
+    let r = (blockMass / blockVol) / liqDensity;
+    if (r > 1 + EQ_TOL) return 1;
+    if (r < 1 - EQ_TOL) return -1;
+    return 0;
+}
+
 function computeEstado() {
-    let bd = blockMass / blockVol;
-    let r  = bd / liqDensity;
-    if (r > 1.03) return { label: '↓  HUNDIÉNDOSE   (ρ bloque > ρ líquido)', col: color(255, 80, 80) };
-    if (r < 0.97) return { label: '↑  FLOTANDO   (ρ bloque < ρ líquido)',    col: color(0, 210, 120) };
-    return         { label: '⇌  EQUILIBRIO NEUTRO   (ρ bloque ≈ ρ líquido)', col: color(255, 202, 50) };
+    let c = compararDensidades();
+    if (c > 0) return { label: '↓  HUNDIÉNDOSE   (ρ bloque > ρ líquido)', col: color(255, 80, 80) };
+    if (c < 0) return { label: '↑  FLOTANDO   (ρ bloque < ρ líquido)',    col: color(0, 210, 120) };
+    return       { label: '⇌  EQUILIBRIO NEUTRO   (ρ bloque = ρ líquido)', col: color(255, 202, 50) };
 }
 
 function updateUI(blockDens, buoyancy, weight, netForce, subRatio, subVol) {
@@ -833,9 +844,10 @@ function updateUI(blockDens, buoyancy, weight, netForce, subRatio, subVol) {
     let valL = document.getElementById('dval-liquid');
     if (barB) {
         barB.style.height = pctB + '%';
-        barB.style.background = blockDens > liqDensity * 1.03
+        let cmpB = compararDensidades();
+        barB.style.background = cmpB > 0
             ? 'linear-gradient(0deg,#993030,#ff7070)'
-            : blockDens < liqDensity * 0.97
+            : cmpB < 0
                 ? 'linear-gradient(0deg,#205020,#50d050)'
                 : 'linear-gradient(0deg,#806020,#ffc832)';
     }
@@ -844,20 +856,19 @@ function updateUI(blockDens, buoyancy, weight, netForce, subRatio, subVol) {
     if (valL)  valL.textContent   = liqDensity.toFixed(3);
 
     // Estado del sistema
-    let bd = blockMass / blockVol;
-    let r  = bd / liqDensity;
+    let cmp = compararDensidades();
     let estadoEl = select('#metric-estado');
     let condEl   = select('#metric-condicion');
 
-    if (r > 1.03) {
+    if (cmp > 0) {
         estadoEl.html('Hundiéndose'); estadoEl.style('color', '#ff5050');
         condEl.html('ρ<sub>bloque</sub> &gt; ρ<sub>líquido</sub>'); condEl.style('color', '#ff5050');
-    } else if (r < 0.97) {
+    } else if (cmp < 0) {
         estadoEl.html('Flotando'); estadoEl.style('color', '#00d080');
         condEl.html('ρ<sub>bloque</sub> &lt; ρ<sub>líquido</sub>'); condEl.style('color', '#00d080');
     } else {
         estadoEl.html('Equilibrio Neutro'); estadoEl.style('color', '#ffc832');
-        condEl.html('ρ<sub>bloque</sub> ≈ ρ<sub>líquido</sub>'); condEl.style('color', '#ffc832');
+        condEl.html('ρ<sub>bloque</sub> = ρ<sub>líquido</sub>'); condEl.style('color', '#ffc832');
     }
 }
 
