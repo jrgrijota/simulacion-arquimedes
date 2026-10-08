@@ -51,6 +51,7 @@ const FBD = { x: 452, y: 30, w: CV_W - 452 - 24, h: CV_H - 60 };
 
 // --- ESTADO GLOBAL ---
 let showFBD = false;  // si el diagrama de cuerpo libre está visible
+let enFondo = false;  // si el bloque descansa en el fondo del tanque
 let bubbles = [];
 let THEME   = {};
 
@@ -312,6 +313,12 @@ function draw() {
         velocityY = 0;
     }
 
+    // Apoyado en el fondo: el suelo del tanque ejerce la fuerza normal que
+    // equilibra lo que el empuje no compensa, y la fuerza neta pasa a ser 0.
+    enFondo = blockY + bSide >= TK.y + TK.h - 1 && weight > buoyancy;
+    let normal = enFondo ? weight - buoyancy : 0;
+    if (enFondo) netForce = 0;
+
     // 4. ACTUALIZAR MÉTRICAS HTML
     updateUI(blockDens, buoyancy, weight, netForce, subRatio, subVol);
 
@@ -319,7 +326,7 @@ function draw() {
     drawMacroView(bX, bSide, subH, subVol, subRatio, buoyancy, weight, blockDens);
 
     if (showFBD) {
-        drawFBDPanel(weight, buoyancy, netForce);
+        drawFBDPanel(weight, buoyancy, netForce, normal);
         stroke('#252525'); strokeWeight(1);
         line(FBD.x - 14, 8, FBD.x - 14, CV_H - 8);
     }
@@ -618,7 +625,7 @@ function drawMacroAnnotations(bX, bSide, subH, subVol, subRatio, buoyancy, weigh
 // ═══════════════════════════════════════════════════════════════════
 //  PANEL DERECHO: DIAGRAMA DE CUERPO LIBRE
 // ═══════════════════════════════════════════════════════════════════
-function drawFBDPanel(weight, buoyancy, netForce) {
+function drawFBDPanel(weight, buoyancy, netForce, normal) {
     push();
     // Fondo del panel
     stroke(THEME.fbdBorder); strokeWeight(1); fill(THEME.fbdBg);
@@ -660,6 +667,19 @@ function drawFBDPanel(weight, buoyancy, netForce) {
     drawFBDArrow(cx, cy, 0, ppx, color(255, 90, 90),
                  'P = ' + weight.toFixed(1) + ' N', false);
 
+    // Normal ↑ — la ejerce el fondo sobre la cara inferior: la flecha empuja
+    // esa cara desde abajo, desplazada a la izquierda para no tapar el peso
+    if (normal > 0.5) {
+        let npx = (normal / maxF) * maxPx;
+        let nx  = cx - bW / 2 + 18, nBase = cy + bH / 2;
+        let nCol = color(200, 140, 255), hs = 12;
+        stroke(nCol); strokeWeight(3.4); fill(nCol);
+        line(nx, nBase + npx, nx, nBase);
+        triangle(nx, nBase, nx - hs / 2.4, nBase + hs, nx + hs / 2.4, nBase + hs);
+        noStroke(); textSize(14); textAlign(RIGHT, CENTER);
+        text('N = ' + normal.toFixed(1) + ' N', nx - 10, nBase + max(npx, 24) / 2 + 6);
+    }
+
     // Fuerza neta — dibujada ÚLTIMA (encima de E y P), mismo punto de aplicación
     let fnAbs = abs(netForce);
     if (fnAbs > 3) {
@@ -680,7 +700,8 @@ function drawFBDPanel(weight, buoyancy, netForce) {
     }
 
     // Ecuación de equilibrio centrada bajo el bloque
-    let eqText = `P ${netForce > 3 ? '>' : netForce < -3 ? '<' : '≈'} E`;
+    let eqText = enFondo ? 'P = E + N'
+               : `P ${netForce > 3 ? '>' : netForce < -3 ? '<' : '≈'} E`;
     let eqCol  = netForce > 3 ? color(255, 90, 90) :
                  netForce < -3 ? color(0, 210, 120) : color(255, 205, 50);
     noStroke(); fill(eqCol); textSize(30); textAlign(CENTER, BOTTOM);
@@ -690,12 +711,12 @@ function drawFBDPanel(weight, buoyancy, netForce) {
     text(estado.label, cx, FBD.y + FBD.h - 24);
 
     // Franja de cálculo numérico (panel derecho del FBD)
-    drawFBDCalculation(weight, buoyancy, netForce);
+    drawFBDCalculation(weight, buoyancy, netForce, normal);
 
     pop();
 }
 
-function drawFBDCalculation(weight, buoyancy, netForce) {
+function drawFBDCalculation(weight, buoyancy, netForce, normal) {
     let px = FBD.x + FBD.w * 0.58;
     let py = FBD.y + 44;
     let pw = FBD.w * 0.40;
@@ -742,14 +763,29 @@ function drawFBDCalculation(weight, buoyancy, netForce) {
     line(px + 12, ty, px + pw - 12, ty);
     ty += 12;
 
+    // ── Normal (solo con el bloque apoyado en el fondo) ──
+    if (enFondo) {
+        noStroke(); fill(200, 140, 255); textSize(13); textAlign(LEFT, TOP);
+        text('Normal (fondo):', tx, ty); ty += ls;
+        fill(THEME.fbdCalcText);
+        text(`N = P − E`, tx + 6, ty); ty += ls;
+        fill(220, 185, 255);
+        text(`  = ${normal.toFixed(1)} N`, tx + 6, ty); ty += ls + 6;
+
+        stroke(THEME.fbdCalcLine); strokeWeight(0.8);
+        line(px + 12, ty, px + pw - 12, ty);
+        ty += 12;
+    }
+
     // ── Fuerza neta ──
     let fnCol = netForce > 3  ? color(255, 195, 40) :
                 netForce < -3 ? color(80, 255, 155)  : color(190, 190, 190);
     noStroke(); fill(fnCol); textSize(13); textAlign(LEFT, TOP);
     text('Fuerza neta:', tx, ty); ty += ls;
     fill(THEME.fbdCalcText);
-    text(`Fn = P − E`, tx + 6, ty); ty += ls;
-    let fnDir = netForce > 3 ? ' ↓ se hunde' : netForce < -3 ? ' ↑ flota' : ' ⇌ equilibrio';
+    text(enFondo ? `Fn = P − E − N` : `Fn = P − E`, tx + 6, ty); ty += ls;
+    let fnDir = enFondo ? ' ⇌ en reposo en el fondo'
+              : netForce > 3 ? ' ↓ se hunde' : netForce < -3 ? ' ↑ flota' : ' ⇌ equilibrio';
     fill(fnCol);
     text(`  = ${netForce.toFixed(1)} N`, tx + 6, ty); ty += ls;
     text(`  ${fnDir}`, tx + 6, ty);
@@ -821,6 +857,7 @@ function compararDensidades() {
 
 function computeEstado() {
     let c = compararDensidades();
+    if (c > 0 && enFondo) return { label: '↓  HUNDIDO, EN EL FONDO   (ρ bloque > ρ líquido)', col: color(255, 80, 80) };
     if (c > 0) return { label: '↓  HUNDIÉNDOSE   (ρ bloque > ρ líquido)', col: color(255, 80, 80) };
     if (c < 0) return { label: '↑  FLOTANDO   (ρ bloque < ρ líquido)',    col: color(0, 210, 120) };
     return       { label: '⇌  EQUILIBRIO NEUTRO   (ρ bloque = ρ líquido)', col: color(255, 202, 50) };
@@ -861,7 +898,7 @@ function updateUI(blockDens, buoyancy, weight, netForce, subRatio, subVol) {
     let condEl   = select('#metric-condicion');
 
     if (cmp > 0) {
-        estadoEl.html('Hundiéndose'); estadoEl.style('color', '#ff5050');
+        estadoEl.html(enFondo ? 'En el fondo' : 'Hundiéndose'); estadoEl.style('color', '#ff5050');
         condEl.html('ρ<sub>bloque</sub> &gt; ρ<sub>líquido</sub>'); condEl.style('color', '#ff5050');
     } else if (cmp < 0) {
         estadoEl.html('Flotando'); estadoEl.style('color', '#00d080');
