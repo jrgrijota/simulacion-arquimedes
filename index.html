@@ -96,16 +96,16 @@
                     <label for="material-presets">Material del bloque</label>
                     <select id="material-presets" class="custom-select">
                         <optgroup label="Flotan en agua">
-                            <option value="corcho">Corcho  (0.24 kg/L)</option>
-                            <option value="madera" selected>Madera  (0.60 kg/L)</option>
-                            <option value="hielo">Hielo   (0.917 kg/L)</option>
-                            <option value="plastico">Plástico (0.95 kg/L)</option>
+                            <option value="corcho">Corcho  (0,24 kg/L)</option>
+                            <option value="madera" selected>Madera  (0,60 kg/L)</option>
+                            <option value="hielo">Hielo   (0,917 kg/L)</option>
+                            <option value="plastico">Plástico (0,95 kg/L)</option>
                         </optgroup>
                         <optgroup label="Se hunden en agua">
-                            <option value="aluminio">Aluminio (2.70 kg/L)</option>
-                            <option value="hierro">Hierro   (7.87 kg/L)</option>
-                            <option value="plomo">Plomo    (11.34 kg/L)</option>
-                            <option value="oro">Oro      (19.30 kg/L)</option>
+                            <option value="aluminio">Aluminio (2,70 kg/L)</option>
+                            <option value="hierro">Hierro   (7,87 kg/L)</option>
+                            <option value="plomo">Plomo    (11,34 kg/L)</option>
+                            <option value="oro">Oro      (19,30 kg/L)</option>
                         </optgroup>
                     </select>
                     <p class="field-hint">La masa se calcula automáticamente: m = ρ × V (volumen fijo de 100 L)</p>
@@ -121,27 +121,27 @@
                 <div class="input-wrapper only-custom">
                     <div class="label-container">
                         <label for="slider-liq">Densidad del líquido</label>
-                        <span id="val-liq" class="value-badge">1.000 kg/L</span>
+                        <span id="val-liq" class="value-badge">1,000 kg/L</span>
                     </div>
                     <input type="range" id="slider-liq" min="0.5" max="13.6" value="1.0" step="0.01">
-                    <div class="slider-bounds"><span>0.50</span><span>13.60 kg/L</span></div>
+                    <div class="slider-bounds"><span>0,50</span><span>13,60 kg/L</span></div>
                 </div>
 
                 <div class="input-wrapper only-materials">
                     <label for="liquid-presets">Líquido del depósito</label>
                     <select id="liquid-presets" class="custom-select">
                         <optgroup label="Menos densos que el agua">
-                            <option value="gasolina">Gasolina   (0.740 kg/L)</option>
-                            <option value="alcohol">Etanol     (0.789 kg/L)</option>
-                            <option value="aceite">Aceite     (0.920 kg/L)</option>
+                            <option value="gasolina">Gasolina   (0,740 kg/L)</option>
+                            <option value="alcohol">Etanol     (0,789 kg/L)</option>
+                            <option value="aceite">Aceite     (0,920 kg/L)</option>
                         </optgroup>
                         <optgroup label="Agua y soluciones acuosas">
-                            <option value="aguadulce" selected>Agua dulce  (1.000 kg/L)</option>
-                            <option value="aguamar">Agua de mar (1.025 kg/L)</option>
-                            <option value="glicerina">Glicerina   (1.261 kg/L)</option>
+                            <option value="aguadulce" selected>Agua dulce  (1,000 kg/L)</option>
+                            <option value="aguamar">Agua de mar (1,025 kg/L)</option>
+                            <option value="glicerina">Glicerina   (1,261 kg/L)</option>
                         </optgroup>
                         <optgroup label="Muy densos">
-                            <option value="mercurio">Mercurio    (13.534 kg/L)</option>
+                            <option value="mercurio">Mercurio    (13,534 kg/L)</option>
                         </optgroup>
                     </select>
                 </div>
@@ -158,14 +158,14 @@
                         <div class="card card-data">
                             <h3>Dens. bloque</h3>
                             <div class="metric">
-                                <span id="metric-densidad">0.50</span>
+                                <span id="metric-densidad">0,50</span>
                                 <small>kg/L</small>
                             </div>
                         </div>
                         <div class="card card-data">
                             <h3>Dens. líquido</h3>
                             <div class="metric">
-                                <span id="metric-dens-liq">1.00</span>
+                                <span id="metric-dens-liq">1,00</span>
                                 <small>kg/L</small>
                             </div>
                         </div>
@@ -196,7 +196,7 @@
                         <div class="card card-data">
                             <h3>Vol.<br>sumergido</h3>
                             <div class="metric">
-                                <span id="metric-vol-sumergido">0.0</span>
+                                <span id="metric-vol-sumergido">0,0</span>
                                 <small>L</small>
                             </div>
                         </div>
@@ -208,7 +208,7 @@
                                 <div class="dbar-outer">
                                     <div id="bar-block" class="dbar-inner dbar-block" style="height:50%"></div>
                                 </div>
-                                <div id="dval-block" class="dbar-val">0.50</div>
+                                <div id="dval-block" class="dbar-val">0,50</div>
                                 <div class="dbar-lbl">ρ bloque</div>
                             </div>
 
@@ -223,7 +223,7 @@
                                 <div class="dbar-outer">
                                     <div id="bar-liquid" class="dbar-inner dbar-liquid" style="height:50%"></div>
                                 </div>
-                                <div id="dval-liquid" class="dbar-val">1.00</div>
+                                <div id="dval-liquid" class="dbar-val">1,00</div>
                                 <div class="dbar-lbl">ρ líquido</div>
                             </div>
                         </div>

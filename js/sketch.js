@@ -3,6 +3,11 @@
 //  Física para Secundaria y Bachillerato
 // ═══════════════════════════════════════════════════════════════════
 
+// Números con coma decimal, como se escriben en clase.
+function fmt(x, d) {
+    return Number(x).toFixed(d).replace('.', ',');
+}
+
 // --- PARÁMETROS FÍSICOS ---
 let blockMass  = 50;   // kg
 let blockVol   = 100;  // litros
@@ -88,7 +93,7 @@ function setup() {
         setSliderFill(sliderVol, VOL_MIN, VOL_MAX);
     });
     sliderLiq.input(() => {
-        select('#val-liq').html(`${parseFloat(sliderLiq.value()).toFixed(3)} kg/L`);
+        select('#val-liq').html(`${fmt(parseFloat(sliderLiq.value()), 3)} kg/L`);
         setSliderFill(sliderLiq, LIQ_MIN, LIQ_MAX);
     });
 
@@ -515,7 +520,7 @@ function drawBlock(bX, bSide, subH, blockDens) {
     // Masa dentro del bloque (si es suficientemente grande)
     if (bSide > 84) {
         noStroke(); fill(THEME.blockMassLabel); textSize(11); textAlign(CENTER, CENTER);
-        text(`${blockMass.toFixed(0)} kg`, bX + bSide / 2, blockY + bSide / 2);
+        text(`${fmt(blockMass, 0)} kg`, bX + bSide / 2, blockY + bSide / 2);
     }
 
     // Etiqueta de densidad sobre el bloque
@@ -526,7 +531,7 @@ function drawBlock(bX, bSide, subH, blockDens) {
                color(255, 205, 50);
     fill(dCol);
     textSize(12); textAlign(CENTER, BOTTOM);
-    text(`ρ = ${blockDens.toFixed(2)} kg/L`, bX + bSide / 2, blockY - 8);
+    text(`ρ = ${fmt(blockDens, 2)} kg/L`, bX + bSide / 2, blockY - 8);
 
     pop();
 }
@@ -572,9 +577,9 @@ function drawDensityBar(blockDens) {
     }
 
     noStroke(); fill(THEME.densLiqLabel); textSize(10); textAlign(LEFT, CENTER);
-    text(liqDensity.toFixed(2), SC.x + SC.w + 12, liqLY);
+    text(fmt(liqDensity, 2), SC.x + SC.w + 12, liqLY);
     fill(mCol);
-    text(blockDens.toFixed(2), SC.x + SC.w + 12, blkLY);
+    text(fmt(blockDens, 2), SC.x + SC.w + 12, blkLY);
 
     // Título de la escala y extremos (mín. arriba, máx. abajo)
     noStroke(); fill(THEME.densTitle); textSize(9);
@@ -582,9 +587,9 @@ function drawDensityBar(blockDens) {
     text('ρ', SC.x + SC.w / 2, SC.y - 14);
     fill(THEME.densScaleLabel); textSize(8);
     textAlign(CENTER, BOTTOM);
-    text(minD.toFixed(2), SC.x + SC.w / 2, SC.y - 2);
+    text(fmt(minD, 2), SC.x + SC.w / 2, SC.y - 2);
     textAlign(CENTER, TOP);
-    text(maxD.toFixed(1), SC.x + SC.w / 2, SC.y + SC.h + 3);
+    text(fmt(maxD, 1), SC.x + SC.w / 2, SC.y + SC.h + 3);
 
     pop();
 }
@@ -603,7 +608,7 @@ function drawMacroAnnotations(bX, bSide, subH, subVol, subRatio, buoyancy, weigh
         noStroke();
         fill(subRatio > 0.99 ? THEME.subPctSink : THEME.subPctFlt);
         textSize(11); textAlign(RIGHT, CENTER);
-        text(`${(subRatio * 100).toFixed(0)}%`, TK.x - 8, midSub);
+        text(`${fmt((subRatio * 100), 0)}%`, TK.x - 8, midSub);
     }
 
     // Línea punteada de la superficie del líquido
@@ -614,9 +619,9 @@ function drawMacroAnnotations(bX, bSide, subH, subVol, subRatio, buoyancy, weigh
 
     // Fórmulas dinámicas bajo el tanque
     noStroke(); fill(THEME.formulaP); textSize(11); textAlign(LEFT, TOP);
-    text(`P = m·g = ${blockMass.toFixed(1)} × 9.8 = ${weight.toFixed(0)} N`, TK.x, TK.y + TK.h + 16);
+    text(`P = m·g = ${fmt(blockMass, 1)} × 9,8 = ${fmt(weight, 0)} N`, TK.x, TK.y + TK.h + 16);
     fill(THEME.formulaE);
-    text(`E = Vsub·ρlíq·g = ${subVol.toFixed(1)} × ${liqDensity.toFixed(2)} × 9.8 = ${buoyancy.toFixed(0)} N`, TK.x, TK.y + TK.h + 36);
+    text(`E = Vsub·ρlíq·g = ${fmt(subVol, 1)} × ${fmt(liqDensity, 2)} × 9,8 = ${fmt(buoyancy, 0)} N`, TK.x, TK.y + TK.h + 36);
 
     // Nombre del líquido si hay preset seleccionado
     let lname = getLiquidName();
@@ -658,20 +663,20 @@ function drawFBDPanel(weight, buoyancy, netForce, normal) {
 
     // Datos del bloque a la derecha, no dentro
     noStroke(); fill(THEME.fbdBlockText); textSize(12); textAlign(LEFT, CENTER);
-    text('m = ' + blockMass.toFixed(1) + ' kg', sideX, cy - 10);
-    text('V = ' + blockVol.toFixed(0)   + ' L', sideX, cy + 10);
+    text('m = ' + fmt(blockMass, 1) + ' kg', sideX, cy - 10);
+    text('V = ' + fmt(blockVol, 0)   + ' L', sideX, cy + 10);
 
     // Empuje ↑ — origen en el centro del bloque
     if (buoyancy > 0.5) {
         let px = (buoyancy / maxF) * maxPx;
         drawFBDArrow(cx, cy, 0, -px, color(0, 200, 255),
-                     'E = ' + buoyancy.toFixed(1) + ' N', true);
+                     'E = ' + fmt(buoyancy, 1) + ' N', true);
     }
 
     // Peso ↓ — origen en el centro del bloque
     let ppx = (weight / maxF) * maxPx;
     drawFBDArrow(cx, cy, 0, ppx, color(255, 90, 90),
-                 'P = ' + weight.toFixed(1) + ' N', false);
+                 'P = ' + fmt(weight, 1) + ' N', false);
 
     // Normal ↑ — la ejerce el fondo sobre la cara inferior: la flecha empuja
     // esa cara desde abajo, desplazada a la izquierda para no tapar el peso
@@ -683,7 +688,7 @@ function drawFBDPanel(weight, buoyancy, netForce, normal) {
         line(nx, nBase + npx, nx, nBase);
         triangle(nx, nBase, nx - hs / 2.4, nBase + hs, nx + hs / 2.4, nBase + hs);
         noStroke(); textSize(14); textAlign(RIGHT, CENTER);
-        text('N = ' + normal.toFixed(1) + ' N', nx - 10, nBase + max(npx, 24) / 2 + 6);
+        text('N = ' + fmt(normal, 1) + ' N', nx - 10, nBase + max(npx, 24) / 2 + 6);
     }
 
     // Fuerza neta — dibujada ÚLTIMA (encima de E y P), mismo punto de aplicación
@@ -702,7 +707,7 @@ function drawFBDPanel(weight, buoyancy, netForce, normal) {
         pop();
         // Etiqueta al lado derecho del bloque, a mitad de la flecha
         noStroke(); fill(fnCol); textSize(12); textAlign(LEFT, CENTER);
-        text('Fn = ' + netForce.toFixed(0) + ' N', sideX, cy + fnDir * fnPx / 2);
+        text('Fn = ' + fmt(netForce, 0) + ' N', sideX, cy + fnDir * fnPx / 2);
     }
 
     // Ecuación de equilibrio centrada bajo el bloque
@@ -748,9 +753,9 @@ function drawFBDCalculation(weight, buoyancy, netForce, normal) {
     text('Peso:', tx, ty); ty += ls;
     fill(THEME.fbdCalcText);
     text(`P = m·g`, tx + 6, ty); ty += ls;
-    text(`  = ${blockMass.toFixed(1)} × 9.8`, tx + 6, ty); ty += ls;
+    text(`  = ${fmt(blockMass, 1)} × 9,8`, tx + 6, ty); ty += ls;
     fill(255, 170, 170);
-    text(`  = ${weight.toFixed(1)} N`, tx + 6, ty); ty += ls + 6;
+    text(`  = ${fmt(weight, 1)} N`, tx + 6, ty); ty += ls + 6;
 
     stroke(THEME.fbdCalcLine); strokeWeight(0.8);
     line(px + 12, ty, px + pw - 12, ty);
@@ -761,9 +766,9 @@ function drawFBDCalculation(weight, buoyancy, netForce, normal) {
     text('Empuje:', tx, ty); ty += ls;
     fill(THEME.fbdCalcText);
     text(`E = Vsub·ρlíq·g`, tx + 6, ty); ty += ls;
-    text(`  = ${vSub.toFixed(1)} × ${liqDensity.toFixed(2)} × 9.8`, tx + 6, ty); ty += ls;
+    text(`  = ${fmt(vSub, 1)} × ${fmt(liqDensity, 2)} × 9,8`, tx + 6, ty); ty += ls;
     fill(140, 225, 255);
-    text(`  = ${buoyancy.toFixed(1)} N`, tx + 6, ty); ty += ls + 6;
+    text(`  = ${fmt(buoyancy, 1)} N`, tx + 6, ty); ty += ls + 6;
 
     stroke(THEME.fbdCalcLine); strokeWeight(0.8);
     line(px + 12, ty, px + pw - 12, ty);
@@ -776,7 +781,7 @@ function drawFBDCalculation(weight, buoyancy, netForce, normal) {
         fill(THEME.fbdCalcText);
         text(`N = P − E`, tx + 6, ty); ty += ls;
         fill(220, 185, 255);
-        text(`  = ${normal.toFixed(1)} N`, tx + 6, ty); ty += ls + 6;
+        text(`  = ${fmt(normal, 1)} N`, tx + 6, ty); ty += ls + 6;
 
         stroke(THEME.fbdCalcLine); strokeWeight(0.8);
         line(px + 12, ty, px + pw - 12, ty);
@@ -793,7 +798,7 @@ function drawFBDCalculation(weight, buoyancy, netForce, normal) {
     let fnDir = enFondo ? ' ⇌ en reposo en el fondo'
               : netForce > 3 ? ' ↓ se hunde' : netForce < -3 ? ' ↑ flota' : ' ⇌ equilibrio';
     fill(fnCol);
-    text(`  = ${(abs(netForce) < 0.05 ? 0 : netForce).toFixed(1)} N`, tx + 6, ty); ty += ls;
+    text(`  = ${fmt(abs(netForce) < 0.05 ? 0 : netForce, 1)} N`, tx + 6, ty); ty += ls;
     text(`  ${fnDir}`, tx + 6, ty);
 }
 
@@ -870,12 +875,12 @@ function computeEstado() {
 }
 
 function updateUI(blockDens, buoyancy, weight, netForce, subRatio, subVol) {
-    select('#metric-densidad').html(blockDens.toFixed(2));
-    select('#metric-dens-liq').html(liqDensity.toFixed(3));
-    select('#metric-empuje').html(buoyancy.toFixed(0));
-    select('#metric-peso').html(weight.toFixed(0));
-    select('#metric-vol-sumergido').html(subVol.toFixed(1));
-    select('#metric-fneta').html(Math.abs(netForce) < 0.5 ? '0' : netForce.toFixed(0));
+    select('#metric-densidad').html(fmt(blockDens, 2));
+    select('#metric-dens-liq').html(fmt(liqDensity, 3));
+    select('#metric-empuje').html(fmt(buoyancy, 0));
+    select('#metric-peso').html(fmt(weight, 0));
+    select('#metric-vol-sumergido').html(fmt(subVol, 1));
+    select('#metric-fneta').html(Math.abs(netForce) < 0.5 ? '0' : fmt(netForce, 0));
 
     // Barras de comparación de densidades
     let maxD = max(blockDens, liqDensity, 0.5);
@@ -895,8 +900,8 @@ function updateUI(blockDens, buoyancy, weight, netForce, subRatio, subVol) {
                 : 'linear-gradient(0deg,#806020,#ffc832)';
     }
     if (barL)  barL.style.height = pctL + '%';
-    if (valB)  valB.textContent   = blockDens.toFixed(2);
-    if (valL)  valL.textContent   = liqDensity.toFixed(3);
+    if (valB)  valB.textContent   = fmt(blockDens, 2);
+    if (valL)  valL.textContent   = fmt(liqDensity, 3);
 
     // Estado del sistema
     let cmp = compararDensidades();
