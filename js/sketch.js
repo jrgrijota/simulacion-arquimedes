@@ -44,7 +44,8 @@ const SC = { x: 22, y: 120, w: 16, h: 470 };
 
 // Tanque (vista macro, panel izquierdo) — mutable: cambia con showFBD
 let TK = { x: 78, y: 120, w: 300, h: 470 };
-const LIQ_Y = TK.y + 110;  // nivel de la superficie del líquido (px)
+const LIQ_Y0 = TK.y + 110;  // nivel del líquido sin el bloque dentro (px)
+let liqY = LIQ_Y0;          // nivel actual: sube con el volumen desalojado
 
 // Diagrama de cuerpo libre (panel derecho, a pantalla completa)
 const FBD = { x: 452, y: 30, w: CV_W - 452 - 24, h: CV_H - 60 };
@@ -288,8 +289,13 @@ function draw() {
     let bX        = TK.x + TK.w / 2 - bSide / 2;
 
     // 3. FÍSICA — PRINCIPIO DE ARQUÍMEDES
+    // El bloque desaloja líquido y el nivel sube: el área sumergida (bSide·subH)
+    // se reparte sobre el ancho interior del tanque. Como subH depende a su vez
+    // del nivel, se resuelven juntos: subH = (fondo − LIQ_Y0) / (1 − bSide/ancho).
     let bBottom  = blockY + bSide;
-    let subH     = constrain(bBottom - LIQ_Y, 0, bSide);   // px sumergidos
+    let tankW    = TK.w - 6;
+    let subH     = constrain((bBottom - LIQ_Y0) / (1 - bSide / tankW), 0, bSide);   // px sumergidos
+    liqY         = LIQ_Y0 - bSide * subH / tankW;
     let subRatio = bSide > 0 ? subH / bSide : 0;            // fracción 0–1
     let subVol   = blockVol * subRatio;                     // litros sumergidos
 
@@ -351,8 +357,8 @@ function drawLiquid() {
     // Gradiente de profundidad
     for (let i = 0; i < 42; i++) {
         let t  = i / 42;
-        let y0 = lerp(LIQ_Y, TK.y + TK.h, t);
-        let y1 = lerp(LIQ_Y, TK.y + TK.h, (i + 1) / 42);
+        let y0 = lerp(liqY, TK.y + TK.h, t);
+        let y1 = lerp(liqY, TK.y + TK.h, (i + 1) / 42);
         let r  = lerp(red(lc),   red(lc)   * 0.38, t);
         let g  = lerp(green(lc), green(lc) * 0.38, t);
         let b  = lerp(blue(lc),  blue(lc)  * 0.38, t);
@@ -393,7 +399,7 @@ function drawTank() {
     stroke(THEME.tankDepthMark); strokeWeight(1);
     let nMarks = 5;
     for (let i = 1; i <= nMarks; i++) {
-        let my = LIQ_Y + (TK.y + TK.h - LIQ_Y) * (i / (nMarks + 1));
+        let my = liqY + (TK.y + TK.h - liqY) * (i / (nMarks + 1));
         line(TK.x + TK.w, my, TK.x + TK.w + 6, my);
         noStroke(); fill(THEME.tankDepthText); textSize(8); textAlign(LEFT, CENTER);
         text((i * 100 / (nMarks + 1)).toFixed(0) + '%', TK.x + TK.w + 8, my);
@@ -411,7 +417,7 @@ function drawLiquidSurface() {
     strokeWeight(2.2); noFill();
     beginShape();
     for (let x = TK.x + 3; x <= TK.x + TK.w - 3; x += 3) {
-        let y = LIQ_Y + sin(t + x * 0.042) * 2.8 + sin(t * 1.4 + x * 0.071) * 1.4;
+        let y = liqY + sin(t + x * 0.042) * 2.8 + sin(t * 1.4 + x * 0.071) * 1.4;
         vertex(x, y);
     }
     endShape();
@@ -420,7 +426,7 @@ function drawLiquidSurface() {
     strokeWeight(3); noFill();
     beginShape();
     for (let x = TK.x + 3; x <= TK.x + TK.w - 3; x += 3) {
-        let y = LIQ_Y + 7 + sin(t * 0.75 + x * 0.038) * 2.2;
+        let y = liqY + 7 + sin(t * 0.75 + x * 0.038) * 2.2;
         vertex(x, y);
     }
     endShape();
@@ -444,10 +450,10 @@ function drawBubbles(blockDens) {
         let b = bubbles[i];
         b.y += b.vy;
         b.x += sin(frameCount * 0.058 + b.phase) * 0.55;
-        let a = map(b.y, LIQ_Y, TK.y + TK.h, 12, THEME.bubbleAlphaMax);
+        let a = map(b.y, liqY, TK.y + TK.h, 12, THEME.bubbleAlphaMax);
         fill(255, 255, 255, max(0, a));
         ellipse(b.x, b.y, b.r * 2, b.r * 2.7);
-        if (b.y < LIQ_Y) bubbles.splice(i, 1);
+        if (b.y < liqY) bubbles.splice(i, 1);
     }
     pop();
 }
@@ -603,7 +609,7 @@ function drawMacroAnnotations(bX, bSide, subH, subVol, subRatio, buoyancy, weigh
     // Línea punteada de la superficie del líquido
     drawingContext.setLineDash([4, 5]);
     stroke(THEME.annotLine); strokeWeight(0.9);
-    line(SC.x + SC.w + 12, LIQ_Y, TK.x - 6, LIQ_Y);
+    line(SC.x + SC.w + 12, liqY, TK.x - 6, liqY);
     drawingContext.setLineDash([]);
 
     // Fórmulas dinámicas bajo el tanque
@@ -787,7 +793,7 @@ function drawFBDCalculation(weight, buoyancy, netForce, normal) {
     let fnDir = enFondo ? ' ⇌ en reposo en el fondo'
               : netForce > 3 ? ' ↓ se hunde' : netForce < -3 ? ' ↑ flota' : ' ⇌ equilibrio';
     fill(fnCol);
-    text(`  = ${netForce.toFixed(1)} N`, tx + 6, ty); ty += ls;
+    text(`  = ${(abs(netForce) < 0.05 ? 0 : netForce).toFixed(1)} N`, tx + 6, ty); ty += ls;
     text(`  ${fnDir}`, tx + 6, ty);
 }
 
@@ -869,7 +875,7 @@ function updateUI(blockDens, buoyancy, weight, netForce, subRatio, subVol) {
     select('#metric-empuje').html(buoyancy.toFixed(0));
     select('#metric-peso').html(weight.toFixed(0));
     select('#metric-vol-sumergido').html(subVol.toFixed(1));
-    select('#metric-fneta').html(netForce.toFixed(0));
+    select('#metric-fneta').html(Math.abs(netForce) < 0.5 ? '0' : netForce.toFixed(0));
 
     // Barras de comparación de densidades
     let maxD = max(blockDens, liqDensity, 0.5);
@@ -1090,7 +1096,7 @@ function drawFluidTexture(liquidKey) {
     push();
     drawingContext.save();
     drawingContext.beginPath();
-    drawingContext.rect(TK.x + 3, LIQ_Y, TK.w - 6, TK.y + TK.h - LIQ_Y);
+    drawingContext.rect(TK.x + 3, liqY, TK.w - 6, TK.y + TK.h - liqY);
     drawingContext.clip();
 
     switch(liquidKey) {
@@ -1098,14 +1104,14 @@ function drawFluidTexture(liquidKey) {
             randomSeed(55);
             for (let i = 0; i < 18; i++) {
                 stroke(225, 230, 240, random(18, 50)); strokeWeight(random(1, 3.5));
-                let sy = LIQ_Y + random(TK.y + TK.h - LIQ_Y - 10);
+                let sy = liqY + random(TK.y + TK.h - liqY - 10);
                 line(TK.x + 10 + random(TK.w - 20), sy,
                      TK.x + 10 + random(TK.w - 20), sy + random(20, 60));
             }
             noStroke();
             for (let x = TK.x + 7; x < TK.x + TK.w - 7; x += 5) {
                 fill(240, 245, 252, 50);
-                ellipse(x, LIQ_Y + 5 + sin(frameCount * 0.04 + x * 0.09) * 2, 3, 3);
+                ellipse(x, liqY + 5 + sin(frameCount * 0.04 + x * 0.09) * 2, 3, 3);
             }
             break;
 
@@ -1113,7 +1119,7 @@ function drawFluidTexture(liquidKey) {
             randomSeed(77); noStroke();
             for (let i = 0; i < 10; i++) {
                 fill(185, 168, 35, random(10, 22));
-                let sy = LIQ_Y + random(20, 50);
+                let sy = liqY + random(20, 50);
                 rect(TK.x + 10 + random(TK.w - 20), sy, random(7, 18), random(35, 100), 3);
             }
             break;
@@ -1122,7 +1128,7 @@ function drawFluidTexture(liquidKey) {
             randomSeed(33); noStroke();
             for (let i = 0; i < 12; i++) {
                 fill(210, 158, 45, random(12, 28));
-                let sy = LIQ_Y + random(15, 40);
+                let sy = liqY + random(15, 40);
                 rect(TK.x + 10 + random(TK.w - 20), sy, random(5, 14), random(50, 130), 4);
             }
             break;
@@ -1136,7 +1142,7 @@ function drawFluidTexture(liquidKey) {
             for (let i = 0; i < iridColors.length; i++) {
                 let c = iridColors[i];
                 fill(c[0], c[1], c[2], 20);
-                rect(TK.x + 3, LIQ_Y + 5 + i * 3 + sin(frameCount * 0.025 + i * 0.9) * 2,
+                rect(TK.x + 3, liqY + 5 + i * 3 + sin(frameCount * 0.025 + i * 0.9) * 2,
                      TK.w - 6, 4);
             }
             break;
@@ -1147,7 +1153,7 @@ function drawFluidTexture(liquidKey) {
                 fill(180, 210, 240, random(8, 18));
                 let br = random(2, 6);
                 ellipse(TK.x + 10 + random(TK.w - 20),
-                        LIQ_Y + random(TK.y + TK.h - LIQ_Y - 10), br, br);
+                        liqY + random(TK.y + TK.h - liqY - 10), br, br);
             }
             break;
     }
