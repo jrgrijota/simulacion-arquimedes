@@ -8,6 +8,39 @@ function fmt(x, d) {
     return Number(x).toFixed(d).replace('.', ',');
 }
 
+// Igual que text(), pero dibuja cada ρ con letra de serifa: en la fuente
+// monoespaciada la ρ parece una P y se confunde con el peso.
+const RHO_FONT = 'Cambria Math, Times New Roman, serif';
+function textRho(str, x, y) {
+    if (!str.includes('ρ')) { text(str, x, y); return; }
+    const mono = textFont();
+    const al = textAlign();
+    const parts = str.split('ρ');
+    textFont(RHO_FONT);
+    textStyle(ITALIC);
+    const wRho = textWidth('ρ');
+    textFont(mono);
+    textStyle(NORMAL);
+    let total = (parts.length - 1) * wRho;
+    for (const p of parts) total += textWidth(p);
+    let cx = al.horizontal === CENTER ? x - total / 2
+           : al.horizontal === RIGHT  ? x - total : x;
+    textAlign(LEFT, al.vertical);
+    parts.forEach((p, i) => {
+        text(p, cx, y);
+        cx += textWidth(p);
+        if (i < parts.length - 1) {
+            textFont(RHO_FONT);
+            textStyle(ITALIC);
+            text('ρ', cx, y);
+            textFont(mono);
+            textStyle(NORMAL);
+            cx += wRho;
+        }
+    });
+    textAlign(al.horizontal, al.vertical);
+}
+
 // --- PARÁMETROS FÍSICOS ---
 let blockMass  = 50;   // kg
 let blockVol   = 100;  // litros
@@ -531,7 +564,7 @@ function drawBlock(bX, bSide, subH, blockDens) {
                color(255, 205, 50);
     fill(dCol);
     textSize(12); textAlign(CENTER, BOTTOM);
-    text(`ρ = ${fmt(blockDens, 2)} kg/L`, bX + bSide / 2, blockY - 8);
+    textRho(`ρ = ${fmt(blockDens, 2)} kg/L`, bX + bSide / 2, blockY - 8);
 
     pop();
 }
@@ -584,7 +617,7 @@ function drawDensityBar(blockDens) {
     // Título de la escala y extremos (mín. arriba, máx. abajo)
     noStroke(); fill(THEME.densTitle); textSize(9);
     textAlign(CENTER, BOTTOM);
-    text('ρ', SC.x + SC.w / 2, SC.y - 14);
+    textRho('ρ', SC.x + SC.w / 2, SC.y - 14);
     fill(THEME.densScaleLabel); textSize(8);
     textAlign(CENTER, BOTTOM);
     text(fmt(minD, 2), SC.x + SC.w / 2, SC.y - 2);
@@ -621,7 +654,7 @@ function drawMacroAnnotations(bX, bSide, subH, subVol, subRatio, buoyancy, weigh
     noStroke(); fill(THEME.formulaP); textSize(11); textAlign(LEFT, TOP);
     text(`P = m·g = ${fmt(blockMass, 1)} × 9,8 = ${fmt(weight, 0)} N`, TK.x, TK.y + TK.h + 16);
     fill(THEME.formulaE);
-    text(`E = Vsub·ρlíq·g = ${fmt(subVol, 1)} × ${fmt(liqDensity, 2)} × 9,8 = ${fmt(buoyancy, 0)} N`, TK.x, TK.y + TK.h + 36);
+    textRho(`E = Vsub·ρlíq·g = ${fmt(subVol, 1)} × ${fmt(liqDensity, 2)} × 9,8 = ${fmt(buoyancy, 0)} N`, TK.x, TK.y + TK.h + 36);
 
     // Nombre del líquido si hay preset seleccionado
     let lname = getLiquidName();
@@ -719,7 +752,7 @@ function drawFBDPanel(weight, buoyancy, netForce, normal) {
     text(eqText, cx, FBD.y + FBD.h - 56);
     let estado = computeEstado();
     fill(estado.col); textSize(14); textAlign(CENTER, BOTTOM);
-    text(estado.label, cx, FBD.y + FBD.h - 24);
+    textRho(estado.label, cx, FBD.y + FBD.h - 24);
 
     // Franja de cálculo numérico (panel derecho del FBD)
     drawFBDCalculation(weight, buoyancy, netForce, normal);
@@ -765,7 +798,7 @@ function drawFBDCalculation(weight, buoyancy, netForce, normal) {
     noStroke(); fill(0, 200, 255); textSize(13); textAlign(LEFT, TOP);
     text('Empuje:', tx, ty); ty += ls;
     fill(THEME.fbdCalcText);
-    text(`E = Vsub·ρlíq·g`, tx + 6, ty); ty += ls;
+    textRho(`E = Vsub·ρlíq·g`, tx + 6, ty); ty += ls;
     text(`  = ${fmt(vSub, 1)} × ${fmt(liqDensity, 2)} × 9,8`, tx + 6, ty); ty += ls;
     fill(140, 225, 255);
     text(`  = ${fmt(buoyancy, 1)} N`, tx + 6, ty); ty += ls + 6;
@@ -910,13 +943,13 @@ function updateUI(blockDens, buoyancy, weight, netForce, subRatio, subVol) {
 
     if (cmp > 0) {
         estadoEl.html(enFondo ? 'En el fondo' : 'Hundiéndose'); estadoEl.style('color', '#ff5050');
-        condEl.html('ρ<sub>bloque</sub> &gt; ρ<sub>líquido</sub>'); condEl.style('color', '#ff5050');
+        condEl.html('<i class="rho">ρ</i><sub>bloque</sub> &gt; <i class="rho">ρ</i><sub>líquido</sub>'); condEl.style('color', '#ff5050');
     } else if (cmp < 0) {
         estadoEl.html('Flotando'); estadoEl.style('color', '#00d080');
-        condEl.html('ρ<sub>bloque</sub> &lt; ρ<sub>líquido</sub>'); condEl.style('color', '#00d080');
+        condEl.html('<i class="rho">ρ</i><sub>bloque</sub> &lt; <i class="rho">ρ</i><sub>líquido</sub>'); condEl.style('color', '#00d080');
     } else {
         estadoEl.html('Equilibrio Neutro'); estadoEl.style('color', '#ffc832');
-        condEl.html('ρ<sub>bloque</sub> = ρ<sub>líquido</sub>'); condEl.style('color', '#ffc832');
+        condEl.html('<i class="rho">ρ</i><sub>bloque</sub> = <i class="rho">ρ</i><sub>líquido</sub>'); condEl.style('color', '#ffc832');
     }
 }
 

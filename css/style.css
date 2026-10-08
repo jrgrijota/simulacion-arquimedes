@@ -986,3 +986,12 @@ body.theme-contrast .qr-sink     { color: #ff4444; background: #1a0000; border-c
 @media (max-width: 500px) {
     .metrics-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* La ρ en letra con serifa: en monoespaciada se confunde con una P (peso). */
+.rho {
+    font-family: 'Cambria Math', 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 1.12em;
+}
+.dcol-center .condicion-badge { white-space: nowrap; }
+.dcol-center .condicion-badge .rho { font-size: 1em; }
