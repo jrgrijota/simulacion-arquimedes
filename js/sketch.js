@@ -608,17 +608,20 @@ function drawMacroAnnotations(bX, bSide, subH, subVol, subRatio, buoyancy, weigh
     push();
     let emergedH = bSide - subH;
 
-    // Indicador de % sumergido (brace lateral izquierda del tanque)
+    // Indicador de % sumergido, junto al bloque (fuera del depósito se montaba
+    // sobre los números de la escala de densidades)
     if (subRatio > 0.01) {
         let midSub = blockY + emergedH + subH / 2;
         drawingContext.setLineDash([3, 4]);
         stroke('#00c8ff44'); strokeWeight(1);
-        line(TK.x - 5, blockY + emergedH, TK.x - 5, blockY + bSide);
+        line(bX - 6, blockY + emergedH, bX - 6, blockY + bSide);
         drawingContext.setLineDash([]);
         noStroke();
-        fill(subRatio > 0.99 ? THEME.subPctSink : THEME.subPctFlt);
+        fill(subRatio > 0.99 ? THEME.subPctSink : color(150, 225, 255));
         textSize(13); textAlign(RIGHT, CENTER);
-        text(`${fmt((subRatio * 100), 0)}%`, TK.x - 8, midSub);
+        stroke(0, 0, 0, 170); strokeWeight(3);   // contorno: se lee sobre el agua
+        text(`${fmt((subRatio * 100), 0)} %`, bX - 10, midSub);
+        noStroke();
     }
 
     // Línea punteada de la superficie del líquido
