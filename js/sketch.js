@@ -584,6 +584,13 @@ function drawDensityBar(blockDens) {
     fill(mCol);
     text(fmt(blockDens, 2), SC.x + SC.w + 12, blkLY);
 
+    // Leyenda de las dos marcas: sin ella no se sabe cuál es el bloque
+    textSize(12); textAlign(LEFT, CENTER);
+    fill(THEME.densLiqLabel);
+    text('◀ líquido', SC.x - 14, SC.y - 66);
+    fill(mCol);
+    text('◀ bloque', SC.x - 14, SC.y - 48);
+
     // Título de la escala y extremos (mín. arriba, máx. abajo)
     noStroke(); fill(THEME.densTitle); textSize(14);
     textAlign(CENTER, BOTTOM);
