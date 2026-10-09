@@ -745,8 +745,11 @@ function drawFBDPanel(weight, buoyancy, netForce, normal) {
     }
 
     // Ecuación de equilibrio centrada bajo el bloque
+    // Flotando en reposo, el peso y el empuje son iguales: «P = E», no «P ≈ E»,
+    // que hace pensar que el empuje es algo mayor. «≈» solo mientras oscila.
+    let enReposo = abs(velocityY) < 0.05;
     let eqText = enFondo ? 'P = E + N'
-               : `P ${netForce > 3 ? '>' : netForce < -3 ? '<' : '≈'} E`;
+               : `P ${netForce > 3 ? '>' : netForce < -3 ? '<' : (enReposo ? '=' : '≈')} E`;
     let eqCol  = netForce > 3 ? color(255, 90, 90) :
                  netForce < -3 ? color(0, 210, 120) : color(255, 205, 50);
     noStroke(); fill(eqCol); textSize(30); textAlign(CENTER, BOTTOM);
