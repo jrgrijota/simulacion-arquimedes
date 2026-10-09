@@ -552,7 +552,7 @@ function drawBlock(bX, bSide, subH, blockDens) {
 
     // Masa dentro del bloque (si es suficientemente grande)
     if (bSide > 84) {
-        noStroke(); fill(THEME.blockMassLabel); textSize(11); textAlign(CENTER, CENTER);
+        noStroke(); fill(THEME.blockMassLabel); textSize(14); textAlign(CENTER, CENTER);
         text(`${fmt(blockMass, 0)} kg`, bX + bSide / 2, blockY + bSide / 2);
     }
 
@@ -563,7 +563,7 @@ function drawBlock(bX, bSide, subH, blockDens) {
                cmp < 0 ? color(0, 215, 120) :
                color(255, 205, 50);
     fill(dCol);
-    textSize(12); textAlign(CENTER, BOTTOM);
+    textSize(14); textAlign(CENTER, BOTTOM);
     textRho(`ρ = ${fmt(blockDens, 2)} kg/L`, bX + bSide / 2, blockY - 8);
 
     pop();
@@ -602,23 +602,23 @@ function drawDensityBar(blockDens) {
              SC.x + SC.w + 9, blkMY + 5);
 
     // Etiquetas con offset dinámico para evitar solapamiento
-    let nearEq = abs(liqMY - blkMY) < 13;
+    let nearEq = abs(liqMY - blkMY) < 15;
     let liqLY = liqMY, blkLY = blkMY;
     if (nearEq) {
-        if (liqMY <= blkMY) { liqLY = liqMY - 7;  blkLY = blkMY + 7; }
-        else                { liqLY = liqMY + 7;  blkLY = blkMY - 7; }
+        if (liqMY <= blkMY) { liqLY = liqMY - 8;  blkLY = blkMY + 8; }
+        else                { liqLY = liqMY + 8;  blkLY = blkMY - 8; }
     }
 
-    noStroke(); fill(THEME.densLiqLabel); textSize(10); textAlign(LEFT, CENTER);
+    noStroke(); fill(THEME.densLiqLabel); textSize(12); textAlign(LEFT, CENTER);
     text(fmt(liqDensity, 2), SC.x + SC.w + 12, liqLY);
     fill(mCol);
     text(fmt(blockDens, 2), SC.x + SC.w + 12, blkLY);
 
     // Título de la escala y extremos (mín. arriba, máx. abajo)
-    noStroke(); fill(THEME.densTitle); textSize(9);
+    noStroke(); fill(THEME.densTitle); textSize(14);
     textAlign(CENTER, BOTTOM);
-    textRho('ρ', SC.x + SC.w / 2, SC.y - 14);
-    fill(THEME.densScaleLabel); textSize(8);
+    textRho('ρ', SC.x + SC.w / 2, SC.y - 16);
+    fill(THEME.densScaleLabel); textSize(11);
     textAlign(CENTER, BOTTOM);
     text(fmt(minD, 2), SC.x + SC.w / 2, SC.y - 2);
     textAlign(CENTER, TOP);
@@ -640,7 +640,7 @@ function drawMacroAnnotations(bX, bSide, subH, subVol, subRatio, buoyancy, weigh
         drawingContext.setLineDash([]);
         noStroke();
         fill(subRatio > 0.99 ? THEME.subPctSink : THEME.subPctFlt);
-        textSize(11); textAlign(RIGHT, CENTER);
+        textSize(13); textAlign(RIGHT, CENTER);
         text(`${fmt((subRatio * 100), 0)}%`, TK.x - 8, midSub);
     }
 
@@ -651,16 +651,17 @@ function drawMacroAnnotations(bX, bSide, subH, subVol, subRatio, buoyancy, weigh
     drawingContext.setLineDash([]);
 
     // Fórmulas dinámicas bajo el tanque
-    noStroke(); fill(THEME.formulaP); textSize(11); textAlign(LEFT, TOP);
+    // Las fórmulas con números son lo que se lee en voz alta: letra de proyector
+    noStroke(); fill(THEME.formulaP); textSize(14); textAlign(LEFT, TOP);
     text(`P = m·g = ${fmt(blockMass, 1)} × 9,8 = ${fmt(weight, 0)} N`, TK.x, TK.y + TK.h + 16);
     fill(THEME.formulaE);
-    textRho(`E = Vsub·ρlíq·g = ${fmt(subVol, 1)} × ${fmt(liqDensity, 2)} × 9,8 = ${fmt(buoyancy, 0)} N`, TK.x, TK.y + TK.h + 36);
+    textRho(`E = Vsub·ρlíq·g = ${fmt(subVol, 1)} × ${fmt(liqDensity, 2)} × 9,8 = ${fmt(buoyancy, 0)} N`, TK.x, TK.y + TK.h + 40);
 
     // Nombre del líquido si hay preset seleccionado
     let lname = getLiquidName();
     if (lname) {
-        fill(THEME.liquidLbl); textSize(10); textAlign(LEFT, TOP);
-        text(`Líquido: ${lname}`, TK.x, TK.y + TK.h + 56);
+        fill(THEME.liquidLbl); textSize(13); textAlign(LEFT, TOP);
+        text(`Líquido: ${lname}`, TK.x, TK.y + TK.h + 66);
     }
 
     pop();
