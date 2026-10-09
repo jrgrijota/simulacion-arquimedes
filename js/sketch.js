@@ -91,7 +91,6 @@ const FBD = { x: 452, y: 30, w: CV_W - 452 - 24, h: CV_H - 60 };
 // --- ESTADO GLOBAL ---
 let showFBD = false;  // si el diagrama de cuerpo libre está visible
 let enFondo = false;  // si el bloque descansa en el fondo del tanque
-let bubbles = [];
 let THEME   = {};
 
 // --- DOM ---
@@ -207,7 +206,6 @@ function updateTheme() {
             blockHatch:     color(0, 90, 170, 28),
             blockMassLabel: color(255, 255, 255, 95),
             blockWaterline: '#0088cc',
-            bubbleAlphaMax: 95,
             densBarBorder:  '#4a5a6a',
             densLiqLabel:   color(8, 28, 55, 255),
             densScaleLabel: '#4a5a6a',
@@ -243,7 +241,6 @@ function updateTheme() {
             blockHatch:     color(0, 255, 255, 38),
             blockMassLabel: color(255, 255, 255, 225),
             blockWaterline: '#00ffff',
-            bubbleAlphaMax: 235,
             densBarBorder:  '#ffff00',
             densLiqLabel:   color(255, 255, 255, 255),
             densScaleLabel: '#aaaaaa',
@@ -279,7 +276,6 @@ function updateTheme() {
             blockHatch:     color(0, 200, 255, 18),
             blockMassLabel: color(255, 255, 255, 50),
             blockWaterline: '#00ffff',
-            bubbleAlphaMax: 170,
             densBarBorder:  '#555555',
             densLiqLabel:   color(255, 255, 255, 220),
             densScaleLabel: '#666666',
@@ -381,7 +377,6 @@ function draw() {
 // ═══════════════════════════════════════════════════════════════════
 function drawMacroView(bX, bSide, subH, subVol, subRatio, buoyancy, weight, blockDens) {
     drawLiquid();
-    drawBubbles(blockDens);
     drawTank();
     drawLiquidSurface();
     drawBlock(bX, bSide, subH, blockDens);
@@ -468,31 +463,6 @@ function drawLiquidSurface() {
         vertex(x, y);
     }
     endShape();
-    pop();
-}
-
-function drawBubbles(blockDens) {
-    if (blockDens > liqDensity && frameCount % 16 === 0 && random() > 0.30) {
-        bubbles.push({
-            x: TK.x + random(22, TK.w - 22),
-            y: TK.y + TK.h - 12,
-            r: random(1.8, 5),
-            vy: random(-0.55, -1.5),
-            phase: random(TWO_PI)
-        });
-    }
-    if (bubbles.length > 45) bubbles.splice(0, 12);
-    push();
-    noStroke();
-    for (let i = bubbles.length - 1; i >= 0; i--) {
-        let b = bubbles[i];
-        b.y += b.vy;
-        b.x += sin(frameCount * 0.058 + b.phase) * 0.55;
-        let a = map(b.y, liqY, TK.y + TK.h, 12, THEME.bubbleAlphaMax);
-        fill(255, 255, 255, max(0, a));
-        ellipse(b.x, b.y, b.r * 2, b.r * 2.7);
-        if (b.y < liqY) bubbles.splice(i, 1);
-    }
     pop();
 }
 
