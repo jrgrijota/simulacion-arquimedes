@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Principio de Arquímedes — Simulación Interactiva</title>
+    <script src="js/i18n-en.js"></script>
+    <script src="js/i18n.js"></script>
     <script src="js/vendor/p5.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -41,14 +43,14 @@
                 <details class="header-details">
                     <summary>Descripción y reglas rápidas</summary>
                     <div class="header-details-body">
-                        <p class="section-note">
+                        <p class="section-note" data-i18n="nota-descripcion">
                             Varía masa, volumen y densidad del líquido para descubrir cuándo un cuerpo
                             flota, se hunde o queda en equilibrio neutro.
                         </p>
                         <div class="quick-rule">
-                            <span class="qr-float"><i class="rho">ρ</i><sub>bloque</sub> &lt; <i class="rho">ρ</i><sub>líquido</sub> → flota ↑</span>
-                            <span class="qr-eq"><i class="rho">ρ</i><sub>bloque</sub> = <i class="rho">ρ</i><sub>líquido</sub> → equilibrio ⇌</span>
-                            <span class="qr-sink"><i class="rho">ρ</i><sub>bloque</sub> &gt; <i class="rho">ρ</i><sub>líquido</sub> → se hunde ↓</span>
+                            <span class="qr-float" data-i18n="regla-flota"><i class="rho">ρ</i><sub>bloque</sub> &lt; <i class="rho">ρ</i><sub>líquido</sub> → flota ↑</span>
+                            <span class="qr-eq" data-i18n="regla-equilibrio"><i class="rho">ρ</i><sub>bloque</sub> = <i class="rho">ρ</i><sub>líquido</sub> → equilibrio ⇌</span>
+                            <span class="qr-sink" data-i18n="regla-hunde"><i class="rho">ρ</i><sub>bloque</sub> &gt; <i class="rho">ρ</i><sub>líquido</sub> → se hunde ↓</span>
                         </div>
                     </div>
                 </details>
@@ -108,7 +110,7 @@
                             <option value="oro">Oro      (19,30 kg/L)</option>
                         </optgroup>
                     </select>
-                    <p class="field-hint">La masa se calcula automáticamente: m = <i class="rho">ρ</i> × V (volumen fijo de 100 L)</p>
+                    <p class="field-hint" data-i18n="ayuda-masa-material">La masa se calcula automáticamente: m = <i class="rho">ρ</i> × V (volumen fijo de 100 L)</p>
                 </div>
             </section>
 
@@ -194,7 +196,7 @@
                             </div>
                         </div>
                         <div class="card card-data">
-                            <h3>Vol.<br>sumergido</h3>
+                            <h3 data-i18n="titulo-vol-sumergido">Vol.<br>sumergido</h3>
                             <div class="metric">
                                 <span id="metric-vol-sumergido">0,0</span>
                                 <small>L</small>
@@ -213,7 +215,7 @@
                             </div>
 
                             <div class="dcol dcol-center">
-                                <h3>Estado del<br>sistema</h3>
+                                <h3 data-i18n="titulo-estado">Estado del<br>sistema</h3>
                                 <span id="metric-estado" class="estado-value">—</span>
                                 <div class="vs-text">vs</div>
                                 <div id="metric-condicion" class="condicion-badge">—</div>

@@ -1,0 +1,118 @@
+// Traducciones al inglés (británico) de la interfaz: «texto en español» → «texto en inglés».
+// Las usa js/i18n.js cuando la página se abre con ?lang=en.
+window.I18N_EN = {
+    // ── Cabecera ──
+    'Principio de Arquímedes — Simulación Interactiva': 'Archimedes’ Principle — Interactive Simulation',
+    'Principio de Arquímedes': 'Archimedes’ Principle',
+    'Flotación, Densidad y Empuje': 'Floating, Density and Upthrust',
+    'Descripción y reglas rápidas': 'Description and quick rules',
+    'nota-descripcion': 'Vary the mass, the volume and the liquid density to discover when an object floats, sinks or stays in neutral equilibrium.',
+    'regla-flota': '<i class="rho">ρ</i><sub>block</sub> &lt; <i class="rho">ρ</i><sub>liquid</sub> → floats ↑',
+    'regla-equilibrio': '<i class="rho">ρ</i><sub>block</sub> = <i class="rho">ρ</i><sub>liquid</sub> → equilibrium ⇌',
+    'regla-hunde': '<i class="rho">ρ</i><sub>block</sub> &gt; <i class="rho">ρ</i><sub>liquid</sub> → sinks ↓',
+
+    // ── Selector de modo ──
+    'Valores libres': 'Free values',
+    'deslizadores': 'sliders',
+    'Materiales reales': 'Real materials',
+    'sin deslizadores': 'no sliders',
+
+    // ── Bloque ──
+    'Bloque': 'Block',
+    'Masa': 'Mass',
+    '(cantidad de materia)': '(amount of matter)',
+    'Volumen': 'Volume',
+    '(espacio que ocupa)': '(space it takes up)',
+    'Material del bloque': 'Block material',
+    'Flotan en agua': 'Float in water',
+    'Se hunden en agua': 'Sink in water',
+    'Corcho  (0,24 kg/L)': 'Cork (0.24 kg/L)',
+    'Madera  (0,60 kg/L)': 'Wood (0.60 kg/L)',
+    'Hielo   (0,917 kg/L)': 'Ice (0.917 kg/L)',
+    'Plástico (0,95 kg/L)': 'Plastic (0.95 kg/L)',
+    'Aluminio (2,70 kg/L)': 'Aluminium (2.70 kg/L)',
+    'Hierro   (7,87 kg/L)': 'Iron (7.87 kg/L)',
+    'Plomo    (11,34 kg/L)': 'Lead (11.34 kg/L)',
+    'Oro      (19,30 kg/L)': 'Gold (19.30 kg/L)',
+    'ayuda-masa-material': 'The mass is calculated automatically: m = <i class="rho">ρ</i> × V (fixed volume of 100 L)',
+
+    // ── Líquido ──
+    'Líquido': 'Liquid',
+    'Densidad del líquido': 'Liquid density',
+    'Líquido del depósito': 'Liquid in the tank',
+    'Menos densos que el agua': 'Less dense than water',
+    'Agua y soluciones acuosas': 'Water and aqueous solutions',
+    'Muy densos': 'Very dense',
+    'Gasolina   (0,740 kg/L)': 'Petrol (0.740 kg/L)',
+    'Etanol     (0,789 kg/L)': 'Ethanol (0.789 kg/L)',
+    'Aceite     (0,920 kg/L)': 'Oil (0.920 kg/L)',
+    'Agua dulce  (1,000 kg/L)': 'Fresh water (1.000 kg/L)',
+    'Agua de mar (1,025 kg/L)': 'Seawater (1.025 kg/L)',
+    'Glicerina   (1,261 kg/L)': 'Glycerol (1.261 kg/L)',
+    'Mercurio    (13,534 kg/L)': 'Mercury (13.534 kg/L)',
+    // Valores iniciales escritos en el HTML (con coma decimal)
+    '1,000 kg/L': '1.000 kg/L',
+    '0,50': '0.50',
+    '13,60 kg/L': '13.60 kg/L',
+    '1,00': '1.00',
+    '0,0': '0.0',
+
+    // ── Métricas ──
+    'Monitorización en tiempo real': 'Real-time readings',
+    'Dens. bloque': 'Block dens.',
+    'Dens. líquido': 'Liquid dens.',
+    'Peso (P)': 'Weight (P)',
+    'Empuje (E)': 'Upthrust (E)',
+    'Fuerza neta': 'Net force',
+    'titulo-vol-sumergido': 'Submerged<br>vol.',
+    'titulo-estado': 'System<br>state',
+    'bloque': 'block',
+    'líquido': 'liquid',
+    'En el fondo': 'On the bottom',
+    'Hundiéndose': 'Sinking',
+    'Flotando': 'Floating',
+    'Equilibrio Neutro': 'Neutral equilibrium',
+
+    // ── Fórmulas ──
+    'Fórmulas esenciales': 'Key formulas',
+    'Densidad:': 'Density:',
+    'Empuje:': 'Upthrust:',
+    'Peso:': 'Weight:',
+    'Equilibrio:': 'Equilibrium:',
+
+    // ── Diagrama y tema ──
+    'Mostrar / ocultar el Diagrama de Cuerpo Libre': 'Show / hide the free-body diagram',
+    'Diagrama de cuerpo libre': 'Free-body diagram',
+    'Cambiar tema': 'Change theme',
+    'Tema visual': 'Visual theme',
+    'Oscuro': 'Dark',
+    'Claro': 'Light',
+    'Alto contraste': 'High contrast',
+
+    // ── Lienzo: depósito y escala de densidades ──
+    'Gasolina': 'Petrol',
+    'Etanol (alcohol)': 'Ethanol (alcohol)',
+    'Aceite vegetal': 'Vegetable oil',
+    'Agua dulce': 'Fresh water',
+    'Agua de mar': 'Seawater',
+    'Glicerina': 'Glycerol',
+    'Mercurio': 'Mercury',
+    '◀ líquido': '◀ liquid',
+    '◀ bloque': '◀ block',
+    'Líquido: {nombre}': 'Liquid: {nombre}',
+    'E = Vsub·ρlíq·g': 'E = Vsub·ρliq·g',
+
+    // ── Lienzo: diagrama de cuerpo libre ──
+    'DIAGRAMA DE CUERPO LIBRE': 'FREE-BODY DIAGRAM',
+    'PASO A PASO': 'STEP BY STEP',
+    'Normal (fondo):': 'Normal (tank floor):',
+    'Fuerza neta:': 'Net force:',
+    ' ⇌ en reposo en el fondo': ' ⇌ at rest on the bottom',
+    ' ↓ se hunde': ' ↓ sinks',
+    ' ↑ flota': ' ↑ floats',
+    ' ⇌ equilibrio': ' ⇌ equilibrium',
+    '↓  HUNDIDO, EN EL FONDO   (ρ bloque > ρ líquido)': '↓  SUNK, ON THE BOTTOM   (ρ block > ρ liquid)',
+    '↓  HUNDIÉNDOSE   (ρ bloque > ρ líquido)': '↓  SINKING   (ρ block > ρ liquid)',
+    '↑  FLOTANDO   (ρ bloque < ρ líquido)': '↑  FLOATING   (ρ block < ρ liquid)',
+    '⇌  EQUILIBRIO NEUTRO   (ρ bloque = ρ líquido)': '⇌  NEUTRAL EQUILIBRIUM   (ρ block = ρ liquid)',
+};
