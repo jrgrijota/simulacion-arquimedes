@@ -1,0 +1,118 @@
+// Interfazearen euskarazko itzulpenak: «texto en español» → «euskarazko testua».
+// js/i18n.js-k erabiltzen ditu orria ?lang=eu-rekin irekitzen denean.
+window.I18N_EU = {
+    // ── Cabecera ──
+    'Principio de Arquímedes — Simulación Interactiva': 'Arkimedesen printzipioa — Simulazio interaktiboa',
+    'Principio de Arquímedes': 'Arkimedesen printzipioa',
+    'Flotación, Densidad y Empuje': 'Flotazioa, dentsitatea eta bultzada',
+    'Descripción y reglas rápidas': 'Deskribapena eta arau azkarrak',
+    'nota-descripcion': 'Aldatu masa, bolumena eta likidoaren dentsitatea, eta ikusi noiz flotatzen duen gorputz batek, noiz hondoratzen den edo noiz geratzen den oreka neutroan.',
+    'regla-flota': '<i class="rho">ρ</i><sub>blokea</sub> &lt; <i class="rho">ρ</i><sub>likidoa</sub> → flotatzen du ↑',
+    'regla-equilibrio': '<i class="rho">ρ</i><sub>blokea</sub> = <i class="rho">ρ</i><sub>likidoa</sub> → oreka ⇌',
+    'regla-hunde': '<i class="rho">ρ</i><sub>blokea</sub> &gt; <i class="rho">ρ</i><sub>likidoa</sub> → hondoratzen da ↓',
+
+    // ── Selector de modo ──
+    'Valores libres': 'Balio libreak',
+    'deslizadores': 'graduatzaileak',
+    'Materiales reales': 'Material errealak',
+    'sin deslizadores': 'graduatzailerik gabe',
+
+    // ── Bloque ──
+    'Bloque': 'Blokea',
+    'Masa': 'Masa',
+    '(cantidad de materia)': '(materia kantitatea)',
+    'Volumen': 'Bolumena',
+    '(espacio que ocupa)': '(hartzen duen lekua)',
+    'Material del bloque': 'Blokearen materiala',
+    'Flotan en agua': 'Uretan flotatzen dute',
+    'Se hunden en agua': 'Uretan hondoratzen dira',
+    'Corcho  (0,24 kg/L)': 'Kortxoa (0,24 kg/L)',
+    'Madera  (0,60 kg/L)': 'Egurra (0,60 kg/L)',
+    'Hielo   (0,917 kg/L)': 'Izotza (0,917 kg/L)',
+    'Plástico (0,95 kg/L)': 'Plastikoa (0,95 kg/L)',
+    'Aluminio (2,70 kg/L)': 'Aluminioa (2,70 kg/L)',
+    'Hierro   (7,87 kg/L)': 'Burdina (7,87 kg/L)',
+    'Plomo    (11,34 kg/L)': 'Beruna (11,34 kg/L)',
+    'Oro      (19,30 kg/L)': 'Urrea (19,30 kg/L)',
+    'ayuda-masa-material': 'Masa automatikoki kalkulatzen da: m = <i class="rho">ρ</i> × V (bolumen finkoa: 100 L)',
+
+    // ── Líquido ──
+    'Líquido': 'Likidoa',
+    'Densidad del líquido': 'Likidoaren dentsitatea',
+    'Líquido del depósito': 'Deposituko likidoa',
+    'Menos densos que el agua': 'Ura baino dentsitate txikiagokoak',
+    'Agua y soluciones acuosas': 'Ura eta ur-disoluzioak',
+    'Muy densos': 'Oso dentsoak',
+    'Gasolina   (0,740 kg/L)': 'Gasolina (0,740 kg/L)',
+    'Etanol     (0,789 kg/L)': 'Etanola (0,789 kg/L)',
+    'Aceite     (0,920 kg/L)': 'Olioa (0,920 kg/L)',
+    'Agua dulce  (1,000 kg/L)': 'Ur geza (1,000 kg/L)',
+    'Agua de mar (1,025 kg/L)': 'Itsasoko ura (1,025 kg/L)',
+    'Glicerina   (1,261 kg/L)': 'Glizerina (1,261 kg/L)',
+    'Mercurio    (13,534 kg/L)': 'Merkurioa (13,534 kg/L)',
+    // Valores iniciales escritos en el HTML (con coma decimal)
+    '1,000 kg/L': '1,000 kg/L',
+    '0,50': '0,50',
+    '13,60 kg/L': '13,60 kg/L',
+    '1,00': '1,00',
+    '0,0': '0,0',
+
+    // ── Métricas ──
+    'Monitorización en tiempo real': 'Denbora errealeko neurketak',
+    'Dens. bloque': 'Blokearen dents.',
+    'Dens. líquido': 'Likidoaren dents.',
+    'Peso (P)': 'Pisua (P)',
+    'Empuje (E)': 'Bultzada (E)',
+    'Fuerza neta': 'Indar garbia',
+    'titulo-vol-sumergido': 'Bol.<br>murgildua',
+    'titulo-estado': 'Sistemaren<br>egoera',
+    'bloque': 'blokea',
+    'líquido': 'likidoa',
+    'En el fondo': 'Hondoan',
+    'Hundiéndose': 'Hondoratzen',
+    'Flotando': 'Flotatzen',
+    'Equilibrio Neutro': 'Oreka neutroa',
+
+    // ── Fórmulas ──
+    'Fórmulas esenciales': 'Funtsezko formulak',
+    'Densidad:': 'Dentsitatea:',
+    'Empuje:': 'Bultzada:',
+    'Peso:': 'Pisua:',
+    'Equilibrio:': 'Oreka:',
+
+    // ── Diagrama y tema ──
+    'Mostrar / ocultar el Diagrama de Cuerpo Libre': 'Erakutsi / ezkutatu gorputz askearen diagrama',
+    'Diagrama de cuerpo libre': 'Gorputz askearen diagrama',
+    'Cambiar tema': 'Aldatu itxura',
+    'Tema visual': 'Itxura',
+    'Oscuro': 'Iluna',
+    'Claro': 'Argia',
+    'Alto contraste': 'Kontraste handia',
+
+    // ── Lienzo: depósito y escala de densidades ──
+    'Gasolina': 'Gasolina',
+    'Etanol (alcohol)': 'Etanola (alkohola)',
+    'Aceite vegetal': 'Landare-olioa',
+    'Agua dulce': 'Ur geza',
+    'Agua de mar': 'Itsasoko ura',
+    'Glicerina': 'Glizerina',
+    'Mercurio': 'Merkurioa',
+    '◀ líquido': '◀ likidoa',
+    '◀ bloque': '◀ blokea',
+    'Líquido: {nombre}': 'Likidoa: {nombre}',
+    'E = Vsub·ρlíq·g': 'E = Vsub·ρlik·g',
+
+    // ── Lienzo: diagrama de cuerpo libre ──
+    'DIAGRAMA DE CUERPO LIBRE': 'GORPUTZ ASKEAREN DIAGRAMA',
+    'PASO A PASO': 'URRATSEZ URRATS',
+    'Normal (fondo):': 'Normala (hondoa):',
+    'Fuerza neta:': 'Indar garbia:',
+    ' ⇌ en reposo en el fondo': ' ⇌ geldirik hondoan',
+    ' ↓ se hunde': ' ↓ hondoratzen da',
+    ' ↑ flota': ' ↑ flotatzen du',
+    ' ⇌ equilibrio': ' ⇌ oreka',
+    '↓  HUNDIDO, EN EL FONDO   (ρ bloque > ρ líquido)': '↓  HONDORATUTA, HONDOAN   (ρ blokea > ρ likidoa)',
+    '↓  HUNDIÉNDOSE   (ρ bloque > ρ líquido)': '↓  HONDORATZEN   (ρ blokea > ρ likidoa)',
+    '↑  FLOTANDO   (ρ bloque < ρ líquido)': '↑  FLOTATZEN   (ρ blokea < ρ likidoa)',
+    '⇌  EQUILIBRIO NEUTRO   (ρ bloque = ρ líquido)': '⇌  OREKA NEUTROA   (ρ blokea = ρ likidoa)',
+};
