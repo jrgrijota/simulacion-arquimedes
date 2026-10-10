@@ -16,7 +16,7 @@ el bloque dibujadas a escala.
 
 ## Uso
 
-Abre `index.html` en un navegador (con `?lang=en`, la interfaz se muestra en inglés, y con `?lang=ca`, en catalán). No necesita instalación ni conexión: incluye
+Abre `index.html` en un navegador (con `?lang=en`, la interfaz se muestra en inglés, con `?lang=ca`, en catalán, y con `?lang=eu`, en euskera). No necesita instalación ni conexión: incluye
 [p5.js](https://p5js.org/) en `js/vendor/`. Tiene temas oscuro, claro y alto contraste
 (botón del engranaje).
 
