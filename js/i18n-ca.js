@@ -1,0 +1,118 @@
+// Traduccions al català de la interfície: «texto en español» → «text en català».
+// Les fa servir js/i18n.js quan la pàgina s'obre amb ?lang=ca.
+window.I18N_CA = {
+    // ── Cabecera ──
+    'Principio de Arquímedes — Simulación Interactiva': 'Principi d\'Arquimedes — Simulació interactiva',
+    'Principio de Arquímedes': 'Principi d\'Arquimedes',
+    'Flotación, Densidad y Empuje': 'Flotació, Densitat i Empenta',
+    'Descripción y reglas rápidas': 'Descripció i regles ràpides',
+    'nota-descripcion': 'Varia la massa, el volum i la densitat del líquid per descobrir quan un cos sura, s\'enfonsa o queda en equilibri neutre.',
+    'regla-flota': '<i class="rho">ρ</i><sub>bloc</sub> &lt; <i class="rho">ρ</i><sub>líquid</sub> → sura ↑',
+    'regla-equilibrio': '<i class="rho">ρ</i><sub>bloc</sub> = <i class="rho">ρ</i><sub>líquid</sub> → equilibri ⇌',
+    'regla-hunde': '<i class="rho">ρ</i><sub>bloc</sub> &gt; <i class="rho">ρ</i><sub>líquid</sub> → s\'enfonsa ↓',
+
+    // ── Selector de modo ──
+    'Valores libres': 'Valors lliures',
+    'deslizadores': 'lliscadors',
+    'Materiales reales': 'Materials reals',
+    'sin deslizadores': 'sense lliscadors',
+
+    // ── Bloque ──
+    'Bloque': 'Bloc',
+    'Masa': 'Massa',
+    '(cantidad de materia)': '(quantitat de matèria)',
+    'Volumen': 'Volum',
+    '(espacio que ocupa)': '(espai que ocupa)',
+    'Material del bloque': 'Material del bloc',
+    'Flotan en agua': 'Suren en aigua',
+    'Se hunden en agua': 'S\'enfonsen en aigua',
+    'Corcho  (0,24 kg/L)': 'Suro (0,24 kg/L)',
+    'Madera  (0,60 kg/L)': 'Fusta (0,60 kg/L)',
+    'Hielo   (0,917 kg/L)': 'Gel (0,917 kg/L)',
+    'Plástico (0,95 kg/L)': 'Plàstic (0,95 kg/L)',
+    'Aluminio (2,70 kg/L)': 'Alumini (2,70 kg/L)',
+    'Hierro   (7,87 kg/L)': 'Ferro (7,87 kg/L)',
+    'Plomo    (11,34 kg/L)': 'Plom (11,34 kg/L)',
+    'Oro      (19,30 kg/L)': 'Or (19,30 kg/L)',
+    'ayuda-masa-material': 'La massa es calcula automàticament: m = <i class="rho">ρ</i> × V (volum fix de 100 L)',
+
+    // ── Líquido ──
+    'Líquido': 'Líquid',
+    'Densidad del líquido': 'Densitat del líquid',
+    'Líquido del depósito': 'Líquid del dipòsit',
+    'Menos densos que el agua': 'Menys densos que l\'aigua',
+    'Agua y soluciones acuosas': 'Aigua i dissolucions aquoses',
+    'Muy densos': 'Molt densos',
+    'Gasolina   (0,740 kg/L)': 'Gasolina (0,740 kg/L)',
+    'Etanol     (0,789 kg/L)': 'Etanol (0,789 kg/L)',
+    'Aceite     (0,920 kg/L)': 'Oli (0,920 kg/L)',
+    'Agua dulce  (1,000 kg/L)': 'Aigua dolça (1,000 kg/L)',
+    'Agua de mar (1,025 kg/L)': 'Aigua de mar (1,025 kg/L)',
+    'Glicerina   (1,261 kg/L)': 'Glicerina (1,261 kg/L)',
+    'Mercurio    (13,534 kg/L)': 'Mercuri (13,534 kg/L)',
+    // Valores iniciales escritos en el HTML (con coma decimal)
+    '1,000 kg/L': '1,000 kg/L',
+    '0,50': '0,50',
+    '13,60 kg/L': '13,60 kg/L',
+    '1,00': '1,00',
+    '0,0': '0,0',
+
+    // ── Métricas ──
+    'Monitorización en tiempo real': 'Monitoratge en temps real',
+    'Dens. bloque': 'Dens. bloc',
+    'Dens. líquido': 'Dens. líquid',
+    'Peso (P)': 'Pes (P)',
+    'Empuje (E)': 'Empenta (E)',
+    'Fuerza neta': 'Força neta',
+    'titulo-vol-sumergido': 'Vol.<br>submergit',
+    'titulo-estado': 'Estat del<br>sistema',
+    'bloque': 'bloc',
+    'líquido': 'líquid',
+    'En el fondo': 'Al fons',
+    'Hundiéndose': 'Enfonsant-se',
+    'Flotando': 'Surant',
+    'Equilibrio Neutro': 'Equilibri neutre',
+
+    // ── Fórmulas ──
+    'Fórmulas esenciales': 'Fórmules essencials',
+    'Densidad:': 'Densitat:',
+    'Empuje:': 'Empenta:',
+    'Peso:': 'Pes:',
+    'Equilibrio:': 'Equilibri:',
+
+    // ── Diagrama y tema ──
+    'Mostrar / ocultar el Diagrama de Cuerpo Libre': 'Mostra / amaga el diagrama de cos lliure',
+    'Diagrama de cuerpo libre': 'Diagrama de cos lliure',
+    'Cambiar tema': 'Canvia el tema',
+    'Tema visual': 'Tema visual',
+    'Oscuro': 'Fosc',
+    'Claro': 'Clar',
+    'Alto contraste': 'Alt contrast',
+
+    // ── Lienzo: depósito y escala de densidades ──
+    'Gasolina': 'Gasolina',
+    'Etanol (alcohol)': 'Etanol (alcohol)',
+    'Aceite vegetal': 'Oli vegetal',
+    'Agua dulce': 'Aigua dolça',
+    'Agua de mar': 'Aigua de mar',
+    'Glicerina': 'Glicerina',
+    'Mercurio': 'Mercuri',
+    '◀ líquido': '◀ líquid',
+    '◀ bloque': '◀ bloc',
+    'Líquido: {nombre}': 'Líquid: {nombre}',
+    'E = Vsub·ρlíq·g': 'E = Vsub·ρlíq·g',
+
+    // ── Lienzo: diagrama de cuerpo libre ──
+    'DIAGRAMA DE CUERPO LIBRE': 'DIAGRAMA DE COS LLIURE',
+    'PASO A PASO': 'PAS A PAS',
+    'Normal (fondo):': 'Normal (fons):',
+    'Fuerza neta:': 'Força neta:',
+    ' ⇌ en reposo en el fondo': ' ⇌ en repòs al fons',
+    ' ↓ se hunde': ' ↓ s\'enfonsa',
+    ' ↑ flota': ' ↑ sura',
+    ' ⇌ equilibrio': ' ⇌ equilibri',
+    '↓  HUNDIDO, EN EL FONDO   (ρ bloque > ρ líquido)': '↓  ENFONSAT, AL FONS   (ρ bloc > ρ líquid)',
+    '↓  HUNDIÉNDOSE   (ρ bloque > ρ líquido)': '↓  ENFONSANT-SE   (ρ bloc > ρ líquid)',
+    '↑  FLOTANDO   (ρ bloque < ρ líquido)': '↑  SURANT   (ρ bloc < ρ líquid)',
+    '⇌  EQUILIBRIO NEUTRO   (ρ bloque = ρ líquido)': '⇌  EQUILIBRI NEUTRE   (ρ bloc = ρ líquid)',
+};
