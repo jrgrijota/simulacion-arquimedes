@@ -115,4 +115,6 @@ window.I18N_EU = {
     '↓  HUNDIÉNDOSE   (ρ bloque > ρ líquido)': '↓  HONDORATZEN   (ρ blokea > ρ likidoa)',
     '↑  FLOTANDO   (ρ bloque < ρ líquido)': '↑  FLOTATZEN   (ρ blokea < ρ likidoa)',
     '⇌  EQUILIBRIO NEUTRO   (ρ bloque = ρ líquido)': '⇌  OREKA NEUTROA   (ρ blokea = ρ likidoa)',
+  // Sello de la zona de simulación (js/sello.js)
+  'Más simulaciones en simulaciencia.es': 'Simulazio gehiago simulaciencia.es webgunean'
 };

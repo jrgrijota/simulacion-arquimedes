@@ -115,4 +115,6 @@ window.I18N_CA = {
     '↓  HUNDIÉNDOSE   (ρ bloque > ρ líquido)': '↓  ENFONSANT-SE   (ρ bloc > ρ líquid)',
     '↑  FLOTANDO   (ρ bloque < ρ líquido)': '↑  SURANT   (ρ bloc < ρ líquid)',
     '⇌  EQUILIBRIO NEUTRO   (ρ bloque = ρ líquido)': '⇌  EQUILIBRI NEUTRE   (ρ bloc = ρ líquid)',
+  // Sello de la zona de simulación (js/sello.js)
+  'Más simulaciones en simulaciencia.es': 'Més simulacions a simulaciencia.es'
 };

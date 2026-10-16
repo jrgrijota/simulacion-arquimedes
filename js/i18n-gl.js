@@ -115,4 +115,6 @@ window.I18N_GL = {
     '↓  HUNDIÉNDOSE   (ρ bloque > ρ líquido)': '↓  AFUNDÍNDOSE   (ρ bloque > ρ líquido)',
     '↑  FLOTANDO   (ρ bloque < ρ líquido)': '↑  FLOTANDO   (ρ bloque < ρ líquido)',
     '⇌  EQUILIBRIO NEUTRO   (ρ bloque = ρ líquido)': '⇌  EQUILIBRIO NEUTRO   (ρ bloque = ρ líquido)',
+  // Sello de la zona de simulación (js/sello.js)
+  'Más simulaciones en simulaciencia.es': 'Máis simulacións en simulaciencia.es'
 };
