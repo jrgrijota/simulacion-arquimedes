@@ -135,8 +135,8 @@ function setup() {
     materialPresets.changed(applyMaterialPreset);
     liquidPresets.changed(applyLiquidPreset);
 
-    modeCustomBtn.mousePressed(() => setMode('custom'));
-    modeMaterialsBtn.mousePressed(() => setMode('materials'));
+    modeCustomBtn.mouseClicked(() => setMode('custom'));
+    modeMaterialsBtn.mouseClicked(() => setMode('materials'));
 
     const fbdToggleBtn = document.getElementById('fbd-toggle');
     if (fbdToggleBtn) {
