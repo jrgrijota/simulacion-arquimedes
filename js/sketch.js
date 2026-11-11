@@ -190,6 +190,17 @@ function setup() {
     });
 
     refreshSliderFills();
+
+    // Ajustes de la dirección (fichas del alumnado): ver js/parametros.js.
+    aplicarParametrosUrl({
+        modo:     urlParam.click({ libre: 'mode-custom', materiales: 'mode-materials' }),
+        masa:     urlParam.range('slider-masa'),
+        volumen:  urlParam.range('slider-volumen'),
+        densidad: urlParam.range('slider-liq'),
+        material: urlParam.select('material-presets'),
+        liquido:  urlParam.select('liquid-presets'),
+        fuerzas:  urlParam.toggle('fbd-toggle', (b) => b.getAttribute('aria-pressed') === 'true'),
+    });
 }
 
 function updateTheme() {
