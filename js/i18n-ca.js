@@ -115,6 +115,21 @@ window.I18N_CA = {
     '↓  HUNDIÉNDOSE   (ρ bloque > ρ líquido)': '↓  ENFONSANT-SE   (ρ bloc > ρ líquid)',
     '↑  FLOTANDO   (ρ bloque < ρ líquido)': '↑  SURANT   (ρ bloc < ρ líquid)',
     '⇌  EQUILIBRIO NEUTRO   (ρ bloque = ρ líquido)': '⇌  EQUILIBRI NEUTRE   (ρ bloc = ρ líquid)',
+
+    // ── Huevo de pascua: Arquímedes en la bañera (último material) ──
+    // «¡EUREKA!» del bocadillo no se traduce.
+    'Arquímedes': 'Arquimedes',
+    'ayuda-arquimedes': 'Arrossega Arquimedes fins a l\'aigua o fes servir el botó. El dipòsit comença ple fins dalt de tot.',
+    '↓ Sumergir a Arquímedes': '↓ Submergir Arquimedes',
+    '↑ Sacar a Arquímedes': '↑ Treure Arquimedes',
+    '↺ Llenar hasta el borde': '↺ Omplir fins dalt de tot',
+    '↓ arrástralo al agua': '↓ arrossega\'l a l\'aigua',
+    'nivel inicial': 'nivell inicial',
+    'Líquido derramado: {v} L': 'Líquid vessat: {v} L',
+    'Sujeto': 'Subjectat',
+    'SUJETO FUERA DEL LÍQUIDO': 'SUBJECTAT FORA DEL LÍQUID',
+    '¡EUREKA! El líquido se desborda.': 'EUREKA! El líquid vessa.',
+
   // Sello de la zona de simulación (js/sello.js)
   'Más simulaciones en simulaciencia.es': 'Més simulacions a simulaciencia.es'
 };

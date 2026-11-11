@@ -115,6 +115,21 @@ window.I18N_EU = {
     '↓  HUNDIÉNDOSE   (ρ bloque > ρ líquido)': '↓  HONDORATZEN   (ρ blokea > ρ likidoa)',
     '↑  FLOTANDO   (ρ bloque < ρ líquido)': '↑  FLOTATZEN   (ρ blokea < ρ likidoa)',
     '⇌  EQUILIBRIO NEUTRO   (ρ bloque = ρ líquido)': '⇌  OREKA NEUTROA   (ρ blokea = ρ likidoa)',
+
+    // ── Huevo de pascua: Arquímedes en la bañera (último material) ──
+    // «¡EUREKA!» del bocadillo no se traduce.
+    'Arquímedes': 'Arkimedes',
+    'ayuda-arquimedes': 'Arrastatu Arkimedes uretara edo erabili botoia. Hasieran, ontzia ertzeraino beteta dago.',
+    '↓ Sumergir a Arquímedes': '↓ Arkimedes urperatu',
+    '↑ Sacar a Arquímedes': '↑ Arkimedes atera',
+    '↺ Llenar hasta el borde': '↺ Ertzeraino bete',
+    '↓ arrástralo al agua': '↓ arrastatu uretara',
+    'nivel inicial': 'hasierako maila',
+    'Líquido derramado: {v} L': 'Isuritako likidoa: {v} L',
+    'Sujeto': 'Eutsita',
+    'SUJETO FUERA DEL LÍQUIDO': 'LIKIDOTIK KANPO EUTSITA',
+    '¡EUREKA! El líquido se desborda.': 'EUREKA! Likidoa gainezka dago.',
+
   // Sello de la zona de simulación (js/sello.js)
   'Más simulaciones en simulaciencia.es': 'Simulazio gehiago simulaciencia.es webgunean'
 };

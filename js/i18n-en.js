@@ -115,6 +115,21 @@ window.I18N_EN = {
     '↓  HUNDIÉNDOSE   (ρ bloque > ρ líquido)': '↓  SINKING   (ρ block > ρ liquid)',
     '↑  FLOTANDO   (ρ bloque < ρ líquido)': '↑  FLOATING   (ρ block < ρ liquid)',
     '⇌  EQUILIBRIO NEUTRO   (ρ bloque = ρ líquido)': '⇌  NEUTRAL EQUILIBRIUM   (ρ block = ρ liquid)',
+
+    // ── Huevo de pascua: Arquímedes en la bañera (último material) ──
+    // «¡EUREKA!» del bocadillo no se traduce.
+    'Arquímedes': 'Archimedes',
+    'ayuda-arquimedes': 'Drag Archimedes into the water or use the button. The tank starts filled to the brim.',
+    '↓ Sumergir a Arquímedes': '↓ Lower Archimedes into the water',
+    '↑ Sacar a Arquímedes': '↑ Lift Archimedes out',
+    '↺ Llenar hasta el borde': '↺ Fill to the brim',
+    '↓ arrástralo al agua': '↓ drag him into the water',
+    'nivel inicial': 'starting level',
+    'Líquido derramado: {v} L': 'Liquid spilled: {v} L',
+    'Sujeto': 'Held',
+    'SUJETO FUERA DEL LÍQUIDO': 'HELD OUT OF THE LIQUID',
+    '¡EUREKA! El líquido se desborda.': 'EUREKA! The liquid overflows.',
+
   // Sello de la zona de simulación (js/sello.js)
   'Más simulaciones en simulaciencia.es': 'More simulations at simulaciencia.es'
 };
