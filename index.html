@@ -117,8 +117,18 @@
                             <option value="plomo">Plomo    (11,34 kg/L)</option>
                             <option value="oro">Oro      (19,30 kg/L)</option>
                         </optgroup>
+                        <!-- Huevo de pascua: Arquímedes en la bañera (ver «HUEVO DE PASCUA» en js/sketch.js) -->
+                        <option value="arquimedes">Arquímedes</option>
                     </select>
-                    <p class="field-hint" data-i18n="ayuda-masa-material">La masa se calcula automáticamente: m = <i class="rho">ρ</i> × V (volumen fijo de 100 L)</p>
+                    <p class="field-hint" id="ayuda-masa-material" data-i18n="ayuda-masa-material">La masa se calcula automáticamente: m = <i class="rho">ρ</i> × V (volumen fijo de 100 L)</p>
+                    <div id="arq-controles" class="arq-controles" hidden>
+                        <p class="field-hint" data-i18n="ayuda-arquimedes">Arrastra a Arquímedes hasta el agua o usa el botón. El depósito empieza lleno hasta el borde.</p>
+                        <div class="arq-botones">
+                            <button type="button" id="arq-sumergir" class="action-btn">↓ Sumergir a Arquímedes</button>
+                            <button type="button" id="arq-rellenar" class="action-btn" disabled>↺ Llenar hasta el borde</button>
+                        </div>
+                    </div>
+                    <div id="arq-aviso" class="sr-only" aria-live="polite"></div>
                 </div>
             </section>
 

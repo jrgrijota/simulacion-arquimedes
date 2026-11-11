@@ -100,6 +100,34 @@ let modeCustomBtn, modeMaterialsBtn;
 
 const defaultState = { mass: 50, vol: 100, liqDensity: 1.0, blockY: 90, velocityY: 0 };
 
+// --- HUEVO DE PASCUA: ARQUÍMEDES ---
+// Última opción de «Materiales reales». Arquímedes aparece sujeto sobre el
+// depósito, que está lleno hasta el borde. Al meterlo en el líquido (arrastrándolo,
+// tocándolo o con el botón del panel) el líquido rebosa y grita «¡EUREKA!»; al
+// sacarlo se ve que el depósito ya no está lleno: falta justo lo que se derramó.
+// Para la física es un rectángulo de ARQ.w × ARQ.h con 70 L y 0,98 kg/L (cuerpo
+// humano con aire en los pulmones): flota casi entero, con un 98 % sumergido.
+const ARQ = { w: 96, h: 112, vol: 70, dens: 0.98 };
+const BRIM = TK.y + 3;                 // nivel «lleno hasta el borde»
+const ARQ_TOP_Y = BRIM - ARQ.h - 4;    // posición en la que está sujeto, fuera del líquido
+const ARQ_SPEED = 5;                   // px por fotograma al sacarlo
+// Siempre en el mismo sitio, con o sin diagrama de cuerpo libre. Centrado en el
+// depósito ancho quedaría bajo el botón del diagrama, que en el móvil tapa la
+// esquina superior derecha del lienzo.
+const ARQ_CX = TK.x + 150;
+let arq = {
+    estado: 'sujeto',   // 'sujeto' | 'libre' (física) | 'arrastrando' | 'subiendo'
+    previo: 'sujeto',   // estado antes de empezar a arrastrar
+    deficit: 0,         // líquido derramado, en px² de la vista (área que falta hasta el borde)
+    derramado: 0,       // litros derramados en total (para el charco)
+    eurekaDesde: -1,    // fotograma en que empezó a rebosar en esta inmersión
+    vertiendo: 0,       // fotogramas que quedan de chorro por encima del borde
+    rellenando: false,
+    gotas: [],
+    subH: 0,
+    dragOff: 0, downY: 0, moved: 0,
+};
+
 
 // ─────────────────────────────────────────────────────────────────
 function setup() {
@@ -133,6 +161,7 @@ function setup() {
     });
 
     materialPresets.changed(applyMaterialPreset);
+    setupArquimedes(canvas.elt);
     liquidPresets.changed(applyLiquidPreset);
 
     modeCustomBtn.mouseClicked(() => setMode('custom'));
@@ -331,20 +360,36 @@ function draw() {
         liqDensity = parseFloat(sliderLiq.value());
     }
 
-    // 2. GEOMETRÍA DEL BLOQUE
+    // 2. GEOMETRÍA DEL BLOQUE (o de Arquímedes, que no es cuadrado)
+    const isArq   = esArquimedes();
     let blockDens = blockMass / blockVol;
-    let bSide     = map(blockVol, VOL_MIN, VOL_MAX, 64, 150);  // tamaño visual
-    let bX        = TK.x + TK.w / 2 - bSide / 2;
+    let bW        = isArq ? ARQ.w : map(blockVol, VOL_MIN, VOL_MAX, 64, 150);  // tamaño visual
+    let bH        = isArq ? ARQ.h : bW;
+    let bX        = (isArq ? ARQ_CX : TK.x + TK.w / 2) - bW / 2;
 
     // 3. FÍSICA — PRINCIPIO DE ARQUÍMEDES
-    // El bloque desaloja líquido y el nivel sube: el área sumergida (bSide·subH)
+    // El bloque desaloja líquido y el nivel sube: el área sumergida (bW·subH)
     // se reparte sobre el ancho interior del tanque. Como subH depende a su vez
-    // del nivel, se resuelven juntos: subH = (fondo − LIQ_Y0) / (1 − bSide/ancho).
-    let bBottom  = blockY + bSide;
+    // del nivel, se resuelven juntos: subH = (fondo − nivel0) / (1 − bW/ancho).
+    let bBottom  = blockY + bH;
     let tankW    = TK.w - 6;
-    let subH     = constrain((bBottom - LIQ_Y0) / (1 - bSide / tankW), 0, bSide);   // px sumergidos
-    liqY         = LIQ_Y0 - bSide * subH / tankW;
-    let subRatio = bSide > 0 ? subH / bSide : 0;            // fracción 0–1
+    if (isArq && arq.rellenando) arq.deficit = max(0, arq.deficit - tankW * 1.2);
+    // Con Arquímedes el depósito empieza lleno hasta el borde, menos lo derramado
+    let nivel0   = isArq ? BRIM + arq.deficit / tankW : LIQ_Y0;
+    let subH     = constrain((bBottom - nivel0) / (1 - bW / tankW), 0, bH);   // px sumergidos
+    liqY         = nivel0 - bW * subH / tankW;
+    if (isArq) {
+        // Por encima del borde no cabe: lo que sobra se derrama y ya no vuelve
+        let derrame = 0;
+        if (liqY < BRIM) {
+            liqY = BRIM;
+            subH = constrain(bBottom - BRIM, 0, bH);
+            derrame = max(0, bW * subH - arq.deficit);
+            arq.deficit += derrame;
+        }
+        updateArquimedes(bX, bW, bH, subH, derrame, tankW);
+    }
+    let subRatio = bH > 0 ? subH / bH : 0;                  // fracción 0–1
     let subVol   = blockVol * subRatio;                     // litros sumergidos
 
     let weight   = blockMass * G;               // N  (kg × m/s²)
@@ -352,24 +397,35 @@ function draw() {
     let netForce = weight - buoyancy;
     let accel    = netForce / max(blockMass, 0.1);
 
-    velocityY += accel * MOTION_SCALE;
-    velocityY = constrain(velocityY, -9, 9);
-    if (subH > 0) velocityY *= FLUID_DRAG;
-    blockY += velocityY;
+    // Arquímedes sujeto, arrastrado o subiendo no se mueve por la física
+    const arqSujeto = isArq && arq.estado !== 'libre';
+    if (arqSujeto) {
+        velocityY = 0;
+        if (arq.estado === 'subiendo') {
+            blockY = max(ARQ_TOP_Y, blockY - ARQ_SPEED);
+            if (blockY <= ARQ_TOP_Y) arq.estado = 'sujeto';
+        }
+    } else {
+        velocityY += accel * MOTION_SCALE;
+        velocityY = constrain(velocityY, -9, 9);
+        if (subH > 0) velocityY *= FLUID_DRAG;
+        blockY += velocityY;
+    }
 
     // Colisiones con las paredes del tanque
-    if (blockY + bSide > TK.y + TK.h) {
-        blockY = TK.y + TK.h - bSide;
+    if (blockY + bH > TK.y + TK.h) {
+        blockY = TK.y + TK.h - bH;
         velocityY *= -0.10;
     }
-    if (blockY < TK.y - bSide * 0.30) {
-        blockY = TK.y - bSide * 0.30;
+    let techo = isArq ? ARQ_TOP_Y : TK.y - bH * 0.30;
+    if (blockY < techo) {
+        blockY = techo;
         velocityY = 0;
     }
 
     // Apoyado en el fondo: el suelo del tanque ejerce la fuerza normal que
     // equilibra lo que el empuje no compensa, y la fuerza neta pasa a ser 0.
-    enFondo = blockY + bSide >= TK.y + TK.h - 1 && weight > buoyancy;
+    enFondo = blockY + bH >= TK.y + TK.h - 1 && weight > buoyancy;
     let normal = enFondo ? weight - buoyancy : 0;
     if (enFondo) netForce = 0;
 
@@ -377,7 +433,7 @@ function draw() {
     updateUI(blockDens, buoyancy, weight, netForce, subRatio, subVol);
 
     // 5. RENDER DE PANELES
-    drawMacroView(bX, bSide, subH, subVol, subRatio, buoyancy, weight, blockDens);
+    drawMacroView(bX, bW, bH, subH, subVol, subRatio, buoyancy, weight, blockDens, isArq);
 
     if (showFBD) {
         drawFBDPanel(weight, buoyancy, netForce, normal);
@@ -389,13 +445,15 @@ function draw() {
 // ═══════════════════════════════════════════════════════════════════
 //  PANEL IZQUIERDO: VISTA MACRO
 // ═══════════════════════════════════════════════════════════════════
-function drawMacroView(bX, bSide, subH, subVol, subRatio, buoyancy, weight, blockDens) {
+function drawMacroView(bX, bW, bH, subH, subVol, subRatio, buoyancy, weight, blockDens, isArq) {
     drawLiquid();
-    drawTank();
-    drawLiquidSurface();
-    drawBlock(bX, bSide, subH, blockDens);
+    drawTank(isArq);
+    drawLiquidSurface(isArq);
+    if (isArq) drawArquimedesEscena(bX, bW, bH, subH, blockDens);
+    else       drawBlock(bX, bW, subH, blockDens);
     drawDensityBar(blockDens);
-    drawMacroAnnotations(bX, bSide, subH, subVol, subRatio, buoyancy, weight, blockDens);
+    drawMacroAnnotations(bX, bH, subH, subVol, subRatio, buoyancy, weight, blockDens);
+    if (isArq) drawArquimedesNotas();
 }
 
 function drawLiquid() {
@@ -431,7 +489,7 @@ function drawLiquid() {
     pop();
 }
 
-function drawTank() {
+function drawTank(isArq) {
     push();
     // Sombra interior
     stroke(THEME.tankInner); strokeWeight(7); noFill();
@@ -439,9 +497,11 @@ function drawTank() {
     // Pared
     stroke(THEME.tankWall); strokeWeight(3); noFill();
     rect(TK.x, TK.y, TK.w, TK.h, 0, 0, 8, 8);
-    // Reflejo superior
-    stroke(THEME.tankReflect); strokeWeight(1.5);
-    line(TK.x + 9, TK.y + 5, TK.x + TK.w - 9, TK.y + 5);
+    // Reflejo superior (con el depósito lleno hasta el borde quedaría dentro del agua)
+    if (!isArq) {
+        stroke(THEME.tankReflect); strokeWeight(1.5);
+        line(TK.x + 9, TK.y + 5, TK.x + TK.w - 9, TK.y + 5);
+    }
     // Marcas de profundidad (lado derecho del tanque)
     stroke(THEME.tankDepthMark); strokeWeight(1);
     let nMarks = 5;
@@ -455,16 +515,18 @@ function drawTank() {
     pop();
 }
 
-function drawLiquidSurface() {
+function drawLiquidSurface(isArq) {
     push();
     let t  = frameCount * 0.034;
+    // Lleno hasta el borde, la ola apenas asoma por encima de él
+    let amp = isArq && liqY < BRIM + 4 ? 0.4 : 1;
     let lc = liquidColor(liqDensity);
     // Onda principal
     stroke(red(lc), green(lc), blue(lc), 220);
     strokeWeight(2.2); noFill();
     beginShape();
     for (let x = TK.x + 3; x <= TK.x + TK.w - 3; x += 3) {
-        let y = liqY + sin(t + x * 0.042) * 2.8 + sin(t * 1.4 + x * 0.071) * 1.4;
+        let y = liqY + (sin(t + x * 0.042) * 2.8 + sin(t * 1.4 + x * 0.071) * 1.4) * amp;
         vertex(x, y);
     }
     endShape();
@@ -618,9 +680,9 @@ function drawDensityBar(blockDens) {
     pop();
 }
 
-function drawMacroAnnotations(bX, bSide, subH, subVol, subRatio, buoyancy, weight, blockDens) {
+function drawMacroAnnotations(bX, bH, subH, subVol, subRatio, buoyancy, weight, blockDens) {
     push();
-    let emergedH = bSide - subH;
+    let emergedH = bH - subH;
 
     // Indicador de % sumergido, junto al bloque (fuera del depósito se montaba
     // sobre los números de la escala de densidades)
@@ -628,7 +690,7 @@ function drawMacroAnnotations(bX, bSide, subH, subVol, subRatio, buoyancy, weigh
         let midSub = blockY + emergedH + subH / 2;
         drawingContext.setLineDash([3, 4]);
         stroke('#00c8ff44'); strokeWeight(1);
-        line(bX - 6, blockY + emergedH, bX - 6, blockY + bSide);
+        line(bX - 6, blockY + emergedH, bX - 6, blockY + bH);
         drawingContext.setLineDash([]);
         noStroke();
         fill(subRatio > 0.99 ? THEME.subPctSink : color(150, 225, 255));
@@ -898,6 +960,7 @@ function compararDensidades() {
 }
 
 function computeEstado() {
+    if (arqFueraSujeto()) return { label: i18n.t('SUJETO FUERA DEL LÍQUIDO'), col: color(0, 200, 255) };
     let c = compararDensidades();
     if (c > 0 && enFondo) return { label: i18n.t('↓  HUNDIDO, EN EL FONDO   (ρ bloque > ρ líquido)'), col: color(255, 80, 80) };
     if (c > 0) return { label: i18n.t('↓  HUNDIÉNDOSE   (ρ bloque > ρ líquido)'), col: color(255, 80, 80) };
@@ -941,7 +1004,10 @@ function updateUI(blockDens, buoyancy, weight, netForce, subRatio, subVol) {
     let estadoEl = select('#metric-estado');
     let condEl   = select('#metric-condicion');
 
-    if (cmp > 0) {
+    if (arqFueraSujeto()) {
+        estadoEl.html(i18n.t('Sujeto')); estadoEl.style('color', '#00c8ff');
+        condEl.html(`${rhoB} &lt; ${rhoL}`); condEl.style('color', '#00c8ff');
+    } else if (cmp > 0) {
         estadoEl.html(i18n.t(enFondo ? 'En el fondo' : 'Hundiéndose')); estadoEl.style('color', '#ff5050');
         condEl.html(`${rhoB} &gt; ${rhoL}`); condEl.style('color', '#ff5050');
     } else if (cmp < 0) {
@@ -981,6 +1047,17 @@ function setMode(mode) {
 
 function applyMaterialPreset() {
     if (!materialPresets) return;
+    const isArq = materialPresets.value() === 'arquimedes';
+    const ayudaMasa = document.getElementById('ayuda-masa-material');
+    const arqCtrl   = document.getElementById('arq-controles');
+    if (ayudaMasa) ayudaMasa.hidden = isArq;
+    if (arqCtrl)   arqCtrl.hidden   = !isArq;
+    if (isArq) {
+        blockVol  = ARQ.vol;
+        blockMass = ARQ.dens * ARQ.vol;
+        reiniciarArquimedes();
+        return;
+    }
     const d = MATERIAL_DENS[materialPresets.value()];
     if (d == null) return;
     blockVol  = MATERIALS_VOL;
@@ -1197,5 +1274,401 @@ function drawFluidTexture(liquidKey) {
     }
 
     drawingContext.restore();
+    pop();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  HUEVO DE PASCUA: ARQUÍMEDES EN LA BAÑERA
+// ═══════════════════════════════════════════════════════════════════
+function esArquimedes() {
+    return currentMode === 'materials' && materialPresets && materialPresets.value() === 'arquimedes';
+}
+
+// Sujeto en el aire (fuera del líquido): las métricas no deben decir «se hunde»
+function arqFueraSujeto() {
+    return esArquimedes() && arq.estado !== 'libre' && arq.subH <= 0;
+}
+
+function reiniciarArquimedes() {
+    arq.estado = 'sujeto';
+    arq.deficit = 0;
+    arq.derramado = 0;
+    arq.eurekaDesde = -1;
+    arq.vertiendo = 0;
+    arq.rellenando = false;
+    arq.gotas = [];
+    arq.subH = 0;
+    blockY = ARQ_TOP_Y;
+    velocityY = 0;
+    actualizarBotonesArq();
+}
+
+// Botón del panel (y toque sin arrastrar): sumergirlo si está fuera, sacarlo si está dentro
+function alternarArquimedes() {
+    if (arq.estado === 'libre') {
+        arq.estado = 'subiendo';
+    } else {
+        arq.estado = 'libre';
+        arq.rellenando = false;
+    }
+    actualizarBotonesArq();
+}
+
+function actualizarBotonesArq() {
+    const sum = document.getElementById('arq-sumergir');
+    const rel = document.getElementById('arq-rellenar');
+    if (sum) sum.textContent = i18n.t(arq.estado === 'libre' ? '↑ Sacar a Arquímedes' : '↓ Sumergir a Arquímedes');
+    // Solo se rellena con Arquímedes fuera: dentro, el líquido rebosaría otra vez
+    if (rel) rel.disabled = !(arq.deficit > 1 && arq.subH <= 0 && !arq.rellenando);
+}
+
+function setupArquimedes(cv) {
+    const sum = document.getElementById('arq-sumergir');
+    const rel = document.getElementById('arq-rellenar');
+    if (sum) sum.addEventListener('click', alternarArquimedes);
+    if (rel) rel.addEventListener('click', () => { arq.rellenando = true; actualizarBotonesArq(); });
+
+    // Arrastre vertical con ratón, lápiz o dedo
+    const pos = (e) => {
+        const r = cv.getBoundingClientRect();
+        return { x: (e.clientX - r.left) * CV_W / r.width, y: (e.clientY - r.top) * CV_H / r.height };
+    };
+    const tocaArq = (p) => {
+        if (!esArquimedes()) return false;
+        const bX = ARQ_CX - ARQ.w / 2;
+        return p.x >= bX - 6 && p.x <= bX + ARQ.w + 6 && p.y >= blockY - 24 && p.y <= blockY + ARQ.h + 4;
+    };
+    // Sin esto, en móvil el dedo desplazaría la página en vez de mover a Arquímedes
+    cv.addEventListener('touchstart', (e) => {
+        const t = e.touches[0];
+        if (t && tocaArq(pos(t))) e.preventDefault();
+    }, { passive: false });
+    cv.addEventListener('pointerdown', (e) => {
+        const p = pos(e);
+        if (!tocaArq(p)) return;
+        arq.previo = arq.estado;
+        arq.estado = 'arrastrando';
+        arq.rellenando = false;
+        arq.dragOff = p.y - blockY;
+        arq.downY = p.y;
+        arq.moved = 0;
+        velocityY = 0;
+        cv.setPointerCapture(e.pointerId);
+        cv.style.cursor = 'grabbing';
+    });
+    cv.addEventListener('pointermove', (e) => {
+        const p = pos(e);
+        if (arq.estado === 'arrastrando') {
+            arq.moved = max(arq.moved, abs(p.y - arq.downY));
+            blockY = constrain(p.y - arq.dragOff, ARQ_TOP_Y, TK.y + TK.h - ARQ.h);
+        } else {
+            cv.style.cursor = tocaArq(p) ? 'grab' : '';
+        }
+    });
+    const soltar = () => {
+        if (arq.estado !== 'arrastrando') return;
+        cv.style.cursor = '';
+        if (arq.moved < 4) {
+            // Toque sin arrastrar: hace lo mismo que el botón
+            arq.estado = arq.previo === 'subiendo' ? 'sujeto' : arq.previo;
+            alternarArquimedes();
+            return;
+        }
+        // Soltado fuera del líquido, se queda sujeto arriba; dentro, manda la física
+        arq.estado = arq.subH > 0 ? 'libre' : 'subiendo';
+        velocityY = 0;
+        actualizarBotonesArq();
+    };
+    cv.addEventListener('pointerup', soltar);
+    cv.addEventListener('pointercancel', soltar);
+}
+
+// Gotas, chorro, «¡EUREKA!» y estado de los botones, una vez por fotograma
+function updateArquimedes(bX, bW, bH, subH, derrame, tankW) {
+    const estabaFuera = arq.subH <= 0;
+    arq.subH = subH;
+    const kL = ARQ.vol / (ARQ.w * ARQ.h);      // litros por px² de la vista
+    if (derrame > 0.05) {
+        arq.derramado += derrame * kL;
+        arq.vertiendo = 18;
+        // Gotas que caen por fuera de las dos paredes
+        const n = min(6, ceil(derrame / 60));
+        for (let i = 0; i < n; i++) {
+            for (const lado of [-1, 1]) {
+                arq.gotas.push({
+                    x: lado < 0 ? TK.x - 1 : TK.x + TK.w + 1,
+                    y: BRIM + random(-2, 2),
+                    vx: lado * random(0.4, 1.8), vy: random(-1.2, 0.4),
+                    r: random(2.5, 5), fuera: true,
+                });
+            }
+        }
+        // Salpicaduras junto a Arquímedes
+        if (derrame > 40 && arq.gotas.length < 260) {
+            for (let i = 0; i < 3; i++) {
+                const lado = random() < 0.5 ? -1 : 1;
+                arq.gotas.push({
+                    x: lado < 0 ? bX - random(2, 10) : bX + bW + random(2, 10),
+                    y: BRIM, vx: lado * random(0.5, 2.2), vy: random(-5, -2.5),
+                    r: random(2, 4), fuera: false,
+                });
+            }
+        }
+        if (arq.eurekaDesde < 0) {
+            arq.eurekaDesde = frameCount;
+            const aviso = document.getElementById('arq-aviso');
+            if (aviso) aviso.textContent = i18n.t('¡EUREKA! El líquido se desborda.');
+        }
+    }
+    if (arq.vertiendo > 0) arq.vertiendo--;
+    // Fuera del líquido se le pasa la emoción
+    if (subH <= 0) arq.eurekaDesde = -1;
+    if (arq.rellenando && arq.deficit <= 0) arq.rellenando = false;
+
+    const suelo = TK.y + TK.h;
+    arq.gotas = arq.gotas.filter(g => {
+        g.vy += 0.32; g.x += g.vx; g.y += g.vy;
+        if (g.fuera) {
+            // Pegadas a la pared: al llegar a ella dejan de alejarse
+            if (g.x < TK.x - 14) g.vx = 0.15;
+            if (g.x > TK.x + TK.w + 14) g.vx = -0.15;
+            return g.y < suelo;
+        }
+        return g.y < liqY + 2 || g.vy < 0;
+    });
+    if (estabaFuera !== (subH <= 0) || frameCount % 10 === 0) actualizarBotonesArq();
+}
+
+// Contorno del color del fondo para que el texto se lea encima del líquido
+function contornoTexto() {
+    const bg = color(THEME.canvasBg);
+    stroke(red(bg), green(bg), blue(bg), 190); strokeWeight(3);
+}
+
+function drawArquimedesEscena(bX, bW, bH, subH, blockDens) {
+    const eureka = arq.eurekaDesde >= 0;
+    const lc = liquidColor(liqDensity);
+    const tinte = color(red(lc) * 0.55, green(lc) * 0.55, blue(lc) * 0.55);
+    const ctx = drawingContext;
+
+    // Parte fuera del líquido, con sus colores
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, CV_W, liqY); ctx.clip();
+    drawArquimedesFigura(bX, blockY, eureka, null);
+    ctx.restore();
+    // Parte sumergida, teñida del color del líquido
+    if (subH > 0) {
+        ctx.save();
+        ctx.beginPath(); ctx.rect(0, liqY, CV_W, CV_H - liqY); ctx.clip();
+        drawArquimedesFigura(bX, blockY, eureka, tinte);
+        ctx.restore();
+        // Línea de flotación
+        if (subH < bH - 1) {
+            push();
+            stroke(red(lc), green(lc), blue(lc), 230); strokeWeight(2.2);
+            line(bX - 6, liqY, bX + bW + 6, liqY);
+            pop();
+        }
+    }
+
+    push();
+    // Densidad a la derecha: encima de la cabeza va el bocadillo
+    noStroke();
+    let cmp  = compararDensidades();
+    fill(cmp > 0 ? color(255, 90, 90) : cmp < 0 ? color(0, 215, 120) : color(255, 205, 50));
+    textSize(14); textAlign(LEFT, CENTER);
+    contornoTexto();
+    textRho(`ρ = ${fmt(blockDens, 2)} kg/L`, bX + bW + 14, blockY + bH * 0.62);
+    noStroke();
+    if (arq.estado === 'sujeto') {
+        fill(THEME.formulaE); textSize(13); textAlign(CENTER, TOP);
+        contornoTexto();
+        text(i18n.t('↓ arrástralo al agua'), bX + bW / 2, BRIM + 14);
+    }
+    pop();
+
+    if (eureka) drawEureka(bX + bW / 2, blockY + 30);
+}
+
+// Arquímedes, ilustración sencilla: calvo, barba blanca, corona de laurel y túnica.
+// Coordenadas locales en un rectángulo de ARQ.w × ARQ.h; con «tinte» se dibuja
+// mezclado con el color del líquido (la parte que está debajo de la superficie).
+function drawArquimedesFigura(x0, y0, eureka, tinte) {
+    const c = (r, g, b) => {
+        const k = color(r, g, b);
+        return tinte ? lerpColor(k, tinte, 0.38) : k;
+    };
+    const linea = c(45, 32, 26);
+    const piel = c(232, 186, 146), pielSombra = c(205, 152, 112);
+    const tela = c(243, 236, 218), telaSombra = c(214, 202, 178);
+    const franja = c(196, 96, 48);
+    const barba = c(238, 238, 236);
+    const laurel = c(86, 150, 70);
+    push();
+    translate(x0, y0);
+    strokeJoin(ROUND);
+
+    // Brazos (detrás del cuerpo): en alto con el «¡EUREKA!», si no, a los lados
+    stroke(linea); strokeWeight(11.5);
+    const mano = (x, y) => { push(); stroke(linea); strokeWeight(1.5); fill(piel); circle(x, y, 13); pop(); };
+    if (eureka) {
+        const s = sin(frameCount * 0.25) * 3;
+        line(26, 58, 8, 14 + s); line(70, 58, 88, 14 - s);
+        stroke(piel); strokeWeight(8.5);
+        line(26, 58, 8, 14 + s); line(70, 58, 88, 14 - s);
+        mano(7, 11 + s); mano(89, 11 - s);
+    } else {
+        line(25, 58, 14, 88); line(71, 58, 82, 88);
+        stroke(piel); strokeWeight(8.5);
+        line(25, 58, 14, 88); line(71, 58, 82, 88);
+        mano(13, 91); mano(83, 91);
+    }
+
+    // Piernas y sandalias
+    stroke(linea); strokeWeight(1.5); fill(piel);
+    rect(33, 96, 10, 11, 2); rect(53, 96, 10, 11, 2);
+    fill(c(120, 72, 38));
+    rect(29, 105, 17, 6, 3); rect(50, 105, 17, 6, 3);
+
+    // Túnica (quitón) con franja en el bajo y pliegue cruzado
+    stroke(linea); strokeWeight(1.6); fill(tela);
+    beginShape();
+    vertex(28, 50); vertex(68, 50);
+    vertex(76, 99); vertex(20, 99);
+    endShape(CLOSE);
+    noStroke(); fill(franja);
+    quad(21, 92, 75, 92, 76, 99, 20, 99);
+    stroke(telaSombra); strokeWeight(2); noFill();
+    line(30, 54, 62, 90); line(42, 66, 38, 92); line(56, 70, 60, 91);
+    // Manto sobre el hombro izquierdo
+    stroke(linea); strokeWeight(1.4); fill(telaSombra);
+    beginShape();
+    vertex(28, 50); vertex(45, 50); vertex(70, 82); vertex(62, 86);
+    endShape(CLOSE);
+
+    // Cabeza
+    stroke(linea); strokeWeight(1.6); fill(piel);
+    ellipse(48, 28, 40, 42);
+    // Orejas
+    ellipse(28, 30, 8, 11); ellipse(68, 30, 8, 11);
+    // Barba y bigote (rizos)
+    noStroke(); fill(barba);
+    const rizos = [[34, 40, 13], [41, 47, 14], [48, 50, 15], [55, 47, 14], [62, 40, 13],
+                   [38, 54, 11], [48, 57, 12], [58, 54, 11], [48, 62, 9]];
+    for (const [rx, ry, rd] of rizos) circle(rx, ry, rd);
+    stroke(c(170, 170, 168)); strokeWeight(1); noFill();
+    for (const [rx, ry, rd] of rizos) arc(rx, ry, rd * 0.6, rd * 0.6, 0.3, PI - 0.3);
+    // Pelo blanco a los lados
+    noStroke(); fill(barba);
+    ellipse(30, 22, 9, 14); ellipse(66, 22, 9, 14);
+    // Ojos y cejas
+    fill(linea);
+    if (eureka) { circle(41, 26, 5.5); circle(55, 26, 5.5); }
+    else        { ellipse(41, 27, 4, 4.5); ellipse(55, 27, 4, 4.5); }
+    stroke(barba); strokeWeight(3);
+    line(36, eureka ? 18 : 21, 45, eureka ? 17 : 21); line(51, eureka ? 17 : 21, 60, eureka ? 18 : 21);
+    // Nariz
+    stroke(pielSombra); strokeWeight(1.6); noFill();
+    arc(48, 32, 7, 6, -0.2, PI * 0.8);
+    // Boca: abierta de par en par al gritar
+    if (eureka) { stroke(linea); strokeWeight(1.2); fill(c(120, 40, 40)); ellipse(48, 41, 9, 9); }
+    else        { stroke(linea); strokeWeight(1.4); noFill(); arc(48, 39, 9, 5, 0.2, PI - 0.2); }
+    // Corona de laurel
+    stroke(c(50, 100, 40)); strokeWeight(1); fill(laurel);
+    for (let i = 0; i < 6; i++) {
+        const a = map(i, 0, 5, PI * 1.12, PI * 1.88);
+        for (const lado of [-1, 1]) {
+            push();
+            translate(48 + cos(a) * 21, 27 + sin(a) * 20);
+            rotate(a + HALF_PI + lado * 0.55);
+            ellipse(0, -4, 5, 10);
+            pop();
+        }
+    }
+    pop();
+}
+
+// Bocadillo de cómic «¡EUREKA!», con un pequeño rebote al aparecer
+function drawEureka(hx, hy) {
+    const t = min((frameCount - arq.eurekaDesde) / 16, 1);
+    const esc = t < 1 ? 1 + 1.7 * pow(t - 1, 3) + 0.7 * pow(t - 1, 2) : 1;   // sale con rebote
+    const bw = 186, bh = 70;
+    // A la derecha de la cabeza y a su altura: más arriba lo taparía en el
+    // móvil el botón del diagrama de cuerpo libre
+    let cx = hx + 150, cy = max(bh / 2 + 96, hy - 24);
+    if (showFBD) cx = min(cx, FBD.x - 16 - bw / 2);
+    push();
+    translate(cx, cy);
+    scale(max(esc, 0.01));
+    const isContrast = document.body.classList.contains('theme-contrast');
+    const tinta = isContrast ? color(0) : color(25, 20, 20);
+    // Cola del bocadillo hacia la cabeza
+    const tx = (hx + 20 - cx) / max(esc, 0.01), ty = (hy - 10 - cy) / max(esc, 0.01);
+    stroke(tinta); strokeWeight(3); fill(255, 252, 232);
+    triangle(-34, 18, -6, 26, tx, ty);
+    // Contorno de explosión (grito)
+    beginShape();
+    const puntas = 22;
+    for (let i = 0; i < puntas * 2; i++) {
+        const a = TWO_PI * i / (puntas * 2);
+        const k = i % 2 === 0 ? 1 : 0.84 + 0.05 * sin(i * 1.7);
+        vertex(cos(a) * bw / 2 * k, sin(a) * bh / 2 * k);
+    }
+    endShape(CLOSE);
+    // Tapa la unión con la cola
+    noStroke(); fill(255, 252, 232);
+    ellipse(0, 0, bw * 0.78, bh * 0.66);
+    // Texto
+    textAlign(CENTER, CENTER);
+    textFont('Impact, "Arial Black", "Helvetica Neue", sans-serif');
+    textStyle(BOLD);
+    textSize(30);
+    stroke(tinta); strokeWeight(5); fill(isContrast ? color(255, 220, 0) : color(255, 196, 40));
+    text('¡EUREKA!', 0, 1);
+    pop();
+    textFont('monospace');
+    textStyle(NORMAL);
+}
+
+// Lo que pasa fuera del depósito: chorro por el borde, gotas, charco y
+// cuánto falta para volver a estar lleno
+function drawArquimedesNotas() {
+    const lc = liquidColor(liqDensity);
+    const suelo = TK.y + TK.h;
+    push();
+    // Charco en el suelo: crece con lo derramado
+    if (arq.derramado > 0.2) {
+        const ext = min(36, 6 + sqrt(arq.derramado) * 4);
+        noStroke(); fill(red(lc), green(lc), blue(lc), 150);
+        rect(TK.x - ext, suelo - 3, TK.w + 2 * ext, 5, 3);
+    }
+    // Chorro por encima de los dos bordes
+    if (arq.vertiendo > 0) {
+        const a = map(arq.vertiendo, 0, 18, 0, 200);
+        stroke(red(lc), green(lc), blue(lc), a); strokeWeight(4); noFill();
+        for (const lado of [-1, 1]) {
+            const x = lado < 0 ? TK.x : TK.x + TK.w;
+            bezier(x - lado * 4, BRIM, x + lado * 6, BRIM - 3, x + lado * 9, BRIM + 10, x + lado * 8, BRIM + 34);
+        }
+    }
+    // Gotas
+    noStroke(); fill(red(lc), green(lc), blue(lc), 210);
+    for (const g of arq.gotas) ellipse(g.x, g.y, g.r, g.r * 1.3);
+
+    // Nivel inicial y litros derramados, si ya falta líquido
+    if (arq.deficit > 1 && liqY > BRIM + 1.5) {
+        drawingContext.setLineDash([5, 5]);
+        stroke(THEME.formulaE); strokeWeight(1.2);
+        line(TK.x + 4, BRIM, TK.x + TK.w - 4, BRIM);
+        drawingContext.setLineDash([]);
+        noStroke(); fill(THEME.formulaE); textSize(12); textAlign(RIGHT, BOTTOM);
+        text(i18n.t('nivel inicial'), TK.x + TK.w - 8, BRIM - 3);
+    }
+    // Lo que falta para el borde es lo que se derramó desde el último llenado
+    const faltan = arq.deficit * ARQ.vol / (ARQ.w * ARQ.h);
+    if (faltan > 0.05) {
+        noStroke(); fill(THEME.formulaE); textSize(13); textAlign(LEFT, TOP);
+        text(i18n.t('Líquido derramado: {v} L', { v: fmt(faltan, 1) }), TK.x, TK.y + TK.h + 88);
+    }
     pop();
 }

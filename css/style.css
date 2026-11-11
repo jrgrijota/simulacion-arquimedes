@@ -999,3 +999,37 @@ body.theme-contrast .qr-sink     { color: #ff4444; background: #1a0000; border-c
 }
 .dcol-center .condicion-badge { white-space: nowrap; }
 .dcol-center .condicion-badge .rho { font-size: 1em; }
+
+/* ════════════════════════════════════════════════════
+   HUEVO DE PASCUA: ARQUÍMEDES (material «Arquímedes»)
+════════════════════════════════════════════════════ */
+.arq-controles { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.arq-controles[hidden] { display: none; }
+.arq-botones { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.action-btn {
+    min-height: 40px;
+    background: #1a2530;
+    border: 1.5px solid #2a3d50;
+    color: #9fb4c4;
+    padding: 7px 10px;
+    border-radius: 7px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.25;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.action-btn:hover:not(:disabled) { background: #0e2230; border-color: #00c8ff88; color: #00c8ff; }
+.action-btn:focus-visible { outline: 2px solid #00c8ff; outline-offset: 2px; }
+.action-btn:disabled { opacity: 0.45; cursor: default; }
+body.theme-light .action-btn { background: #dde5f0; border-color: #a8b8cc; color: #2a4a6a; }
+body.theme-light .action-btn:hover:not(:disabled) { background: #c8d8ec; border-color: #0088bb; color: #0055aa; }
+body.theme-light .action-btn:focus-visible { outline-color: #0077aa; }
+body.theme-contrast .action-btn { background: #000000; border-color: #00ffff; color: #00ffff; }
+body.theme-contrast .action-btn:hover:not(:disabled) { border-color: #ffffff; color: #ffffff; }
+body.theme-contrast .action-btn:focus-visible { outline-color: #ffff00; }
+.sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
