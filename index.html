@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Principio de Arquímedes — Simulación Interactiva</title>
     <!-- Página pública de esta simulación: simulaciencia.es. Esta dirección (github.io) es la que carga la web dentro de un iframe; la canónica evita que los buscadores la indexen como página aparte. -->
-    <meta name="description" content="Flotabilidad y empuje: con valores libres o con materiales y líquidos reales, observa cuándo un cuerpo flota, se hunde o queda en equilibrio, y sus fuerzas.">
+    <meta name="description" content="Suelta un bloque en un depósito de vidrio con líquido: mira cuánto líquido aparta, cómo crece el empuje y por qué flota o se hunde. Con valores libres o con materiales y líquidos reales.">
     <link rel="canonical" id="canonical" href="https://simulaciencia.es/simulaciones/arquimedes/">
     <script>(function(){var d={"en":"en/simulations/","ca":"ca/simulacions/","eu":"eu/simulazioak/","gl":"gl/simulacions/"}[new URLSearchParams(location.search).get('lang')];if(d)document.getElementById('canonical').href='https://simulaciencia.es/'+d+'arquimedes/';})();</script>
     <script src="js/i18n-en.js"></script>
@@ -15,281 +15,42 @@
     <script src="js/i18n.js"></script>
     <script src="js/vendor/p5.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/estilo-juego.css">
+    <link rel="stylesheet" href="css/escena-comun.css">
+    <link rel="stylesheet" href="css/escena.css">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="js/estadisticas.js" data-sim="sim-arquimedes"></script>
-    <script src="js/sello.js" data-contenedor="main.simulation-panel" data-esquina="br" data-margen-derecho="56"></script>
+    <script src="js/sello.js" data-contenedor="main.simulation-panel" data-esquina="br" data-margen-derecho="14"></script>
 </head>
-<body class="mode-custom">
-    <div class="app-container">
+<body class="modo-libre">
+    <!-- Tema guardado, antes de pintar: Pizarra (oscuro) por defecto; ?tema=simulaciencia|claro|oscuro|contraste manda -->
+    <script>(function(){var t=null;try{t=localStorage.getItem('sim-arquimedes-tema');}catch(e){}var q={simulaciencia:'marca',marca:'marca',claro:'light',contraste:'contrast',oscuro:'dark'}[new URLSearchParams(location.search).get('tema')];if(q)t=q;var c=document.body.classList;if(t==='marca')c.add('theme-light','theme-marca');else if(t==='light'||t==='contrast')c.add('theme-'+t);})();</script>
 
-        <!-- ── PANEL DE CONTROL ──────────────────────────────────── -->
-        <aside class="control-panel">
-
-            <header>
-                <div class="header-top">
-                    <svg class="header-icon-svg" width="42" height="42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <!-- Depósito -->
-                        <rect x="3" y="5" width="36" height="32" rx="3.5" stroke="#585858" stroke-width="1.8" fill="#0d0d0d"/>
-                        <!-- Agua -->
-                        <rect x="4.9" y="23" width="32.2" height="13" fill="#0c76da" opacity="0.50"/>
-                        <!-- Superficie del agua (onda) -->
-                        <path d="M5 23 Q12 21 21 23 Q30 25 37 23" stroke="#00c8ff" stroke-width="1.5" fill="none"/>
-                        <!-- Bloque (mitad sobre el agua, mitad dentro) -->
-                        <rect x="14" y="17" width="14" height="12" rx="2.5" fill="#1a2e42" stroke="#00c8ff" stroke-width="2"/>
-                        <!-- Línea de flotación sobre el bloque -->
-                        <line x1="14" y1="23" x2="28" y2="23" stroke="#00ffe0" stroke-width="1.2" opacity="0.85"/>
-                        <!-- Flecha empuje (cyan, hacia arriba) -->
-                        <line x1="21" y1="16" x2="21" y2="10" stroke="#00c8ff" stroke-width="1.6"/>
-                        <polygon points="21,7 18.5,11.5 23.5,11.5" fill="#00c8ff"/>
-                        <!-- Flecha peso (rojo, hacia abajo) -->
-                        <line x1="21" y1="30" x2="21" y2="36" stroke="#ff5a5a" stroke-width="1.6"/>
-                        <polygon points="21,39 18.5,34.5 23.5,34.5" fill="#ff5a5a"/>
-                    </svg>
-                    <h1>Principio de Arquímedes</h1>
-                </div>
-                <p class="subtitle">Flotación, Densidad y Empuje</p>
-                <details class="header-details">
-                    <summary>Descripción y reglas rápidas</summary>
-                    <div class="header-details-body">
-                        <p class="section-note" data-i18n="nota-descripcion">
-                            Varía masa, volumen y densidad del líquido para descubrir cuándo un cuerpo
-                            flota, se hunde o queda en equilibrio neutro.
-                        </p>
-                        <div class="quick-rule">
-                            <span class="qr-float" data-i18n="regla-flota"><i class="rho">ρ</i><sub>bloque</sub> &lt; <i class="rho">ρ</i><sub>líquido</sub> → flota ↑</span>
-                            <span class="qr-eq" data-i18n="regla-equilibrio"><i class="rho">ρ</i><sub>bloque</sub> = <i class="rho">ρ</i><sub>líquido</sub> → equilibrio ⇌</span>
-                            <span class="qr-sink" data-i18n="regla-hunde"><i class="rho">ρ</i><sub>bloque</sub> &gt; <i class="rho">ρ</i><sub>líquido</sub> → se hunde ↓</span>
-                        </div>
-                    </div>
-                </details>
-            </header>
-
-            <hr class="divider">
-
-            <!-- SELECTOR DE MODO -->
-            <div class="mode-switch" role="group">
-                <button id="mode-custom" type="button" class="mode-btn active">
-                    Valores libres
-                    <span class="mode-sub">deslizadores</span>
-                </button>
-                <button id="mode-materials" type="button" class="mode-btn">
-                    Materiales reales
-                    <span class="mode-sub">sin deslizadores</span>
-                </button>
-            </div>
-
-            <hr class="divider">
-
-            <!-- PROPIEDADES DEL BLOQUE -->
-            <section class="control-group">
-                <h2>Bloque</h2>
-
-                <div class="input-wrapper only-custom">
-                    <div class="label-container">
-                        <label for="slider-masa">Masa <span class="label-hint">(cantidad de materia)</span></label>
-                        <span id="val-masa" class="value-badge">50 kg</span>
-                    </div>
-                    <input type="range" id="slider-masa" min="10" max="200" value="50" step="1">
-                    <div class="slider-bounds"><span>10 kg</span><span>200 kg</span></div>
-                </div>
-
-                <div class="input-wrapper only-custom">
-                    <div class="label-container">
-                        <label for="slider-volumen">Volumen <span class="label-hint">(espacio que ocupa)</span></label>
-                        <span id="val-volumen" class="value-badge">100 L</span>
-                    </div>
-                    <input type="range" id="slider-volumen" min="50" max="150" value="100" step="1">
-                    <div class="slider-bounds"><span>50 L</span><span>150 L</span></div>
-                </div>
-
-                <div class="input-wrapper only-materials">
-                    <label for="material-presets">Material del bloque</label>
-                    <select id="material-presets" class="custom-select">
-                        <optgroup label="Flotan en agua">
-                            <option value="corcho">Corcho  (0,24 kg/L)</option>
-                            <option value="madera" selected>Madera  (0,60 kg/L)</option>
-                            <option value="hielo">Hielo   (0,917 kg/L)</option>
-                            <option value="plastico">Plástico (0,95 kg/L)</option>
-                        </optgroup>
-                        <optgroup label="Se hunden en agua">
-                            <option value="aluminio">Aluminio (2,70 kg/L)</option>
-                            <option value="hierro">Hierro   (7,87 kg/L)</option>
-                            <option value="plomo">Plomo    (11,34 kg/L)</option>
-                            <option value="oro">Oro      (19,30 kg/L)</option>
-                        </optgroup>
-                        <!-- Huevo de pascua: Arquímedes en la bañera (ver «HUEVO DE PASCUA» en js/sketch.js) -->
-                        <option value="arquimedes">Arquímedes</option>
-                    </select>
-                    <p class="field-hint" id="ayuda-masa-material" data-i18n="ayuda-masa-material">La masa se calcula automáticamente: m = <i class="rho">ρ</i> × V (volumen fijo de 100 L)</p>
-                    <div id="arq-controles" class="arq-controles" hidden>
-                        <p class="field-hint" data-i18n="ayuda-arquimedes">Arrastra a Arquímedes hasta el agua o usa el botón. El depósito empieza lleno hasta el borde.</p>
-                        <div class="arq-botones">
-                            <button type="button" id="arq-sumergir" class="action-btn">↓ Sumergir a Arquímedes</button>
-                            <button type="button" id="arq-rellenar" class="action-btn" disabled>↺ Llenar hasta el borde</button>
-                        </div>
-                    </div>
-                    <div id="arq-aviso" class="sr-only" aria-live="polite"></div>
-                </div>
-            </section>
-
-            <hr class="divider">
-
-            <!-- LÍQUIDO -->
-            <section class="control-group">
-                <h2>Líquido</h2>
-
-                <div class="input-wrapper only-custom">
-                    <div class="label-container">
-                        <label for="slider-liq">Densidad del líquido</label>
-                        <span id="val-liq" class="value-badge">1,000 kg/L</span>
-                    </div>
-                    <input type="range" id="slider-liq" min="0.5" max="13.6" value="1.0" step="0.01">
-                    <div class="slider-bounds"><span>0,50</span><span>13,60 kg/L</span></div>
-                </div>
-
-                <div class="input-wrapper only-materials">
-                    <label for="liquid-presets">Líquido del depósito</label>
-                    <select id="liquid-presets" class="custom-select">
-                        <optgroup label="Menos densos que el agua">
-                            <option value="gasolina">Gasolina   (0,740 kg/L)</option>
-                            <option value="alcohol">Etanol     (0,789 kg/L)</option>
-                            <option value="aceite">Aceite     (0,920 kg/L)</option>
-                        </optgroup>
-                        <optgroup label="Agua y soluciones acuosas">
-                            <option value="aguadulce" selected>Agua dulce  (1,000 kg/L)</option>
-                            <option value="aguamar">Agua de mar (1,025 kg/L)</option>
-                            <option value="glicerina">Glicerina   (1,261 kg/L)</option>
-                        </optgroup>
-                        <optgroup label="Muy densos">
-                            <option value="mercurio">Mercurio    (13,534 kg/L)</option>
-                        </optgroup>
-                    </select>
-                </div>
-            </section>
-
-            <hr class="divider">
-
-            <!-- MÉTRICAS EN TIEMPO REAL (plegable) -->
-            <details class="custom-details" open>
-                <summary>Monitorización en tiempo real</summary>
-                <div class="details-content metrics-content">
-
-                    <div class="metrics-grid">
-                        <div class="card card-data">
-                            <h3>Dens. bloque</h3>
-                            <div class="metric">
-                                <span id="metric-densidad">0,50</span>
-                                <small>kg/L</small>
-                            </div>
-                        </div>
-                        <div class="card card-data">
-                            <h3>Dens. líquido</h3>
-                            <div class="metric">
-                                <span id="metric-dens-liq">1,00</span>
-                                <small>kg/L</small>
-                            </div>
-                        </div>
-                        <div class="card card-data">
-                            <h3>Peso (P)</h3>
-                            <div class="metric">
-                                <span id="metric-peso">490</span>
-                                <small>N</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="metrics-grid">
-                        <div class="card card-data">
-                            <h3>Empuje (E)</h3>
-                            <div class="metric">
-                                <span id="metric-empuje">0</span>
-                                <small>N</small>
-                            </div>
-                        </div>
-                        <div class="card card-data">
-                            <h3>Fuerza neta</h3>
-                            <div class="metric">
-                                <span id="metric-fneta">0</span>
-                                <small>N</small>
-                            </div>
-                        </div>
-                        <div class="card card-data">
-                            <h3 data-i18n="titulo-vol-sumergido">Vol.<br>sumergido</h3>
-                            <div class="metric">
-                                <span id="metric-vol-sumergido">0,0</span>
-                                <small>L</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card card-estado">
-                        <div class="density-compare">
-                            <div class="dcol">
-                                <div class="dbar-outer">
-                                    <div id="bar-block" class="dbar-inner dbar-block" style="height:50%"></div>
-                                </div>
-                                <div id="dval-block" class="dbar-val">0,50</div>
-                                <div class="dbar-lbl"><i class="rho">ρ</i> bloque</div>
-                            </div>
-
-                            <div class="dcol dcol-center">
-                                <h3 data-i18n="titulo-estado">Estado del<br>sistema</h3>
-                                <span id="metric-estado" class="estado-value">—</span>
-                                <div class="vs-text">vs</div>
-                                <div id="metric-condicion" class="condicion-badge">—</div>
-                            </div>
-
-                            <div class="dcol">
-                                <div class="dbar-outer">
-                                    <div id="bar-liquid" class="dbar-inner dbar-liquid" style="height:50%"></div>
-                                </div>
-                                <div id="dval-liquid" class="dbar-val">1,00</div>
-                                <div class="dbar-lbl"><i class="rho">ρ</i> líquido</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </details>
-
-            <!-- FÓRMULAS -->
-            <details class="custom-details">
-                <summary>Fórmulas esenciales</summary>
-                <div class="details-content">
-                    <div class="card edu-card">
-                        <div class="formula-list">
-                            <div class="formula">
-                                <span class="formula-name">Densidad:</span>
-                                <span class="formula-eq"><i class="rho">ρ</i> = m / V</span>
-                            </div>
-                            <div class="formula">
-                                <span class="formula-name">Empuje:</span>
-                                <span class="formula-eq">E = <i class="rho">ρ</i><sub>líquido</sub> · g · V<sub>sub</sub></span>
-                            </div>
-                            <div class="formula">
-                                <span class="formula-name">Peso:</span>
-                                <span class="formula-eq">P = m · g</span>
-                            </div>
-                            <div class="formula">
-                                <span class="formula-name">Equilibrio:</span>
-                                <span class="formula-eq">E = P  →  V<sub>sub</sub>/V = <i class="rho">ρ</i><sub>bloque</sub>/<i class="rho">ρ</i><sub>líquido</sub></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </details>
-
-        </aside>
-
-        <!-- ── PANEL DE SIMULACIÓN ───────────────────────────────── -->
-        <main class="simulation-panel">
-            <button id="fbd-toggle" type="button" class="fbd-toggle-btn"
-                    aria-pressed="false"
-                    title="Mostrar / ocultar el Diagrama de Cuerpo Libre">
-                Diagrama de cuerpo libre
-            </button>
-
-            <!-- Botón de tema -->
-            <button id="theme-btn" class="theme-btn" title="Cambiar tema" aria-label="Cambiar tema" aria-expanded="false">
+    <!-- ── CABECERA COMÚN ─────────────────────────────────────── -->
+    <header class="barra-sup">
+        <div class="marca-sim">
+            <svg class="header-icon-svg" width="42" height="42" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="1.2" y="1.2" width="37.6" height="37.6" rx="11" fill="#1f5d8c" stroke="#071a2b" stroke-width="2.4"/>
+                <path d="M5 22 q5 -3 10 0 t10 0 t10 0 V35 H5 Z" fill="#3a9be0" stroke="#071a2b" stroke-width="1.8"/>
+                <rect x="13" y="15" width="14" height="13" rx="2" fill="#c98d55" stroke="#071a2b" stroke-width="1.8"/>
+                <path d="M13 22 h14" stroke="#e6f7ff" stroke-width="1.4"/>
+                <path d="M20 14 V7" stroke="#8cc8ff" stroke-width="2.4" stroke-linecap="round"/><path d="M20 4 l-3.6 5 h7.2Z" fill="#8cc8ff" stroke="#071a2b" stroke-width="1"/>
+                <path d="M20 29 V33" stroke="#ff8f7f" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+            <h1><span class="solo-ancho">Principio de Arquímedes</span><span class="solo-movil">Arquímedes</span></h1>
+        </div>
+        <div class="carril modos" role="tablist" aria-label="Modo">
+            <button type="button" class="carril-btn" data-modo="libre" role="tab" aria-selected="true">Valores libres</button>
+            <button type="button" class="carril-btn" data-modo="materiales" role="tab" aria-selected="false">Materiales reales</button>
+        </div>
+        <!-- Interruptor «Fuerzas»: apagado, la escena se centra en el dibujo (2.º y 3.º de ESO). Tecla F; ?fuerzas=0 -->
+        <button id="btn-fuerzas" type="button" class="interruptor" role="switch" aria-checked="true" aria-keyshortcuts="F" title="Mostrar u ocultar las fuerzas (tecla F)">
+            <span class="interruptor-txt">Fuerzas</span><span class="interruptor-pista" aria-hidden="true"><span class="interruptor-bola"></span></span>
+        </button>
+        <div class="botones-sup">
+            <button id="btn-ayuda" type="button" class="boton-suelto boton-redondo" aria-expanded="false" aria-controls="panel-ayuda" title="¿Qué dice el principio de Arquímedes?" aria-label="¿Qué dice el principio de Arquímedes?">?</button>
+            <button id="btn-retos" type="button" class="boton-suelto boton-retos" aria-expanded="false" aria-controls="panel-retos"><span aria-hidden="true">★</span> <span class="btn-retos-txt">Retos</span></button>
+            <button id="theme-btn" class="theme-btn" title="Ajustes" aria-label="Ajustes" aria-expanded="false">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58
                     c0.18-0.14,0.23-0.41,0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96
@@ -305,8 +66,15 @@
                 </svg>
             </button>
             <div id="theme-panel" class="theme-panel" aria-hidden="true">
+                <label class="check-row" for="check-pantalla">
+                    <input type="checkbox" id="check-pantalla">
+                    <span>Pantalla completa</span>
+                </label>
                 <p class="theme-panel-title">Tema visual</p>
                 <div class="theme-options">
+                    <button class="theme-opt" data-theme="marca">
+                        <span class="theme-swatch marca-swatch"></span>SimulaCiencia
+                    </button>
                     <button class="theme-opt active" data-theme="dark">
                         <span class="theme-swatch dark-swatch"></span>Oscuro
                     </button>
@@ -318,12 +86,145 @@
                     </button>
                 </div>
             </div>
+        </div>
+    </header>
 
-            <div id="canvas-container"></div>
-        </main>
-
+    <!-- ── BLOQUE (fila de contexto) ─────────────────────────── -->
+    <div class="barra-sus">
+        <span class="barra-sus-label" id="lbl-bloque">Bloque</span>
+        <i class="punto punto-libre only-libre" aria-hidden="true"></i>
+        <p class="sus-info only-libre"><strong>Elige la masa y el volumen del bloque y la densidad del líquido.</strong> <em>¿Flota porque es ligero… o por otra cosa?</em></p>
+        <div class="carrusel only-materiales">
+            <button type="button" class="flecha-carrusel izq" aria-label="Ver los materiales anteriores" tabindex="-1">‹</button>
+            <div class="carril materiales" role="radiogroup" aria-labelledby="lbl-bloque">
+                <button type="button" class="carril-btn" data-mat="corcho" role="radio" aria-checked="false"><i class="punto"></i>Corcho</button>
+                <button type="button" class="carril-btn" data-mat="madera" role="radio" aria-checked="true"><i class="punto"></i>Madera</button>
+                <button type="button" class="carril-btn" data-mat="hielo" role="radio" aria-checked="false"><i class="punto"></i>Hielo</button>
+                <button type="button" class="carril-btn" data-mat="plastico" role="radio" aria-checked="false"><i class="punto"></i>Plástico</button>
+                <button type="button" class="carril-btn" data-mat="aluminio" role="radio" aria-checked="false"><i class="punto"></i>Aluminio</button>
+                <button type="button" class="carril-btn" data-mat="hierro" role="radio" aria-checked="false"><i class="punto"></i>Hierro</button>
+                <button type="button" class="carril-btn" data-mat="plomo" role="radio" aria-checked="false"><i class="punto"></i>Plomo</button>
+                <button type="button" class="carril-btn" data-mat="oro" role="radio" aria-checked="false"><i class="punto"></i>Oro</button>
+                <button type="button" class="carril-btn" data-mat="arquimedes" role="radio" aria-checked="false"><i class="laurel" aria-hidden="true"></i>Arquímedes</button>
+            </div>
+            <button type="button" class="flecha-carrusel der" aria-label="Ver más materiales" tabindex="-1">›</button>
+        </div>
+        <div id="acciones" class="acciones">
+            <button id="btn-soltar" type="button" class="boton-suelto boton-accion" aria-keyshortcuts="S" title="Soltar el bloque otra vez desde arriba (tecla S)"><span aria-hidden="true">↻</span> Soltar otra vez</button>
+            <button id="btn-arq-mover" type="button" class="boton-suelto boton-accion" aria-keyshortcuts="S" hidden><span class="txt">↑ Sacarlo del agua</span></button>
+            <button id="btn-arq-llenar" type="button" class="boton-suelto boton-accion" hidden>↺ Llenar al borde</button>
+        </div>
     </div>
+
+    <div class="app-container">
+
+        <!-- ── PANEL DE SIMULACIÓN ───────────────────────────────── -->
+        <main class="simulation-panel">
+            <div id="escena" class="escena">
+                <div id="canvas-container"></div>
+                <!-- Para el teclado: el cuerpo se sujeta con las flechas ↑ ↓ y se suelta con Espacio -->
+                <button id="agarre" type="button" class="agarre" aria-label="Sujetar el cuerpo: flechas arriba y abajo para moverlo, Espacio para soltarlo"></button>
+                <!-- Pestañas del papel -->
+                <div id="pestanas" class="carril pestanas" role="tablist" aria-label="Qué se ve en el papel">
+                    <button type="button" class="carril-btn" data-pestana="fuerzas" role="tab" aria-selected="true">Fuerzas</button>
+                    <button type="button" class="carril-btn" data-pestana="presion" role="tab" aria-selected="false"><span class="solo-ancho">¿De dónde sale el empuje?</span><span class="solo-movil">¿De dónde sale?</span></button>
+                </div>
+                <!-- Mandos, bajo el depósito -->
+                <div class="mandos-lienzo mandos-arq">
+                    <div class="bloque-mando only-libre">
+                        <div class="fila-slider">
+                            <label for="sl-masa">Masa del bloque</label>
+                            <span class="valor-slider" id="val-masa">50 kg</span>
+                        </div>
+                        <input type="range" id="sl-masa" min="10" max="200" value="50" step="1">
+                        <div class="slider-bounds"><span>10 kg</span><span>200 kg</span></div>
+                    </div>
+                    <div class="bloque-mando only-libre">
+                        <div class="fila-slider">
+                            <label for="sl-vol">Volumen del bloque</label>
+                            <span class="valor-slider" id="val-vol">100 L</span>
+                        </div>
+                        <input type="range" id="sl-vol" min="50" max="150" value="100" step="1">
+                        <div class="slider-bounds"><span>50 L</span><span>150 L</span></div>
+                    </div>
+                    <div class="bloque-mando only-libre">
+                        <div class="fila-slider">
+                            <label for="sl-liq">Densidad del líquido</label>
+                            <span class="valor-slider" id="val-liq">1,00 kg/L</span>
+                        </div>
+                        <input type="range" id="sl-liq" min="0.5" max="13.6" value="1" step="0.01">
+                        <div class="slider-bounds"><span>0,50</span><span>13,60 kg/L</span></div>
+                    </div>
+                    <div class="bloque-mando only-materiales">
+                        <p class="titulo-mando" id="lbl-liq">Líquido del depósito</p>
+                        <div class="rejilla-liq" role="radiogroup" aria-labelledby="lbl-liq">
+                            <button type="button" class="boton-liq" data-liq="gasolina" role="radio" aria-checked="false"><i class="punto"></i><span>Gasolina</span><small>0,740 kg/L</small></button>
+                            <button type="button" class="boton-liq" data-liq="etanol" role="radio" aria-checked="false"><i class="punto"></i><span>Etanol</span><small>0,789 kg/L</small></button>
+                            <button type="button" class="boton-liq" data-liq="aceite" role="radio" aria-checked="false"><i class="punto"></i><span>Aceite</span><small>0,920 kg/L</small></button>
+                            <button type="button" class="boton-liq" data-liq="aguadulce" role="radio" aria-checked="true"><i class="punto"></i><span>Agua dulce</span><small>1,000 kg/L</small></button>
+                            <button type="button" class="boton-liq" data-liq="aguamar" role="radio" aria-checked="false"><i class="punto"></i><span>Agua de mar</span><small>1,025 kg/L</small></button>
+                            <button type="button" class="boton-liq" data-liq="glicerina" role="radio" aria-checked="false"><i class="punto"></i><span>Glicerina</span><small>1,261 kg/L</small></button>
+                            <button type="button" class="boton-liq" data-liq="mercurio" role="radio" aria-checked="false"><i class="punto"></i><span>Mercurio</span><small>13,534 kg/L</small></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="anuncio" class="sr-only" aria-live="polite"></div>
+        </main>
+    </div>
+
+    <!-- ── AYUDA: ¿QUÉ DICE EL PRINCIPIO DE ARQUÍMEDES? ─────────── -->
+    <div id="panel-ayuda" class="panel-flotante panel-ayuda" hidden>
+        <div class="panel-cab"><h2>¿Qué dice el principio de Arquímedes?</h2><button type="button" class="boton-cerrar" data-cerrar="panel-ayuda" aria-label="Cerrar">✕</button></div>
+        <p data-i18n="intro-arquimedes">Todo cuerpo sumergido en un líquido recibe un <strong>empuje</strong> hacia arriba igual al <strong>peso del líquido que aparta</strong>.</p>
+        <div class="card edu-card">
+            <div class="formula-list">
+                <div class="formula"><span class="formula-name">Empuje</span><span class="formula-eq">E = V<sub>sum</sub> · ρ<sub>líq</sub> · g</span></div>
+                <div class="formula"><span class="formula-name">Peso</span><span class="formula-eq">P = m · g</span></div>
+                <div class="formula"><span class="formula-name">Flota quieto</span><span class="formula-eq">E = P → V<sub>sum</sub> / V = ρ<sub>bloque</sub> / ρ<sub>líq</sub></span></div>
+            </div>
+        </div>
+        <ul class="key-ideas">
+            <li data-i18n="idea-flotar">Si el bloque es <strong>menos denso</strong> que el líquido, baja solo hasta apartar su propio peso de líquido y ahí se queda flotando.</li>
+            <li data-i18n="idea-hundir">Si es <strong>más denso</strong>, ni cubierto entero aparta su peso: se hunde y el fondo pone el resto (la normal, N).</li>
+            <li data-i18n="idea-profundidad">El líquido empuja más abajo que arriba. Esa diferencia es el empuje, y <strong>no cambia con la profundidad</strong> cuando el bloque ya está cubierto.</li>
+            <li data-i18n="idea-mano"><strong>Coge el bloque</strong> con el ratón, el dedo o las flechas del teclado: mientras lo sujetas, aparece la fuerza de tu mano (F).</li>
+            <li data-i18n="idea-fuerzas">El interruptor <strong>Fuerzas</strong> oculta las flechas y los newtons para mirar solo el dibujo.</li>
+        </ul>
+        <p class="nota">El depósito mide 12 · 6,5 · 11 dm. Los bloques son cubos macizos: su lado crece con la raíz cúbica del volumen. g = 9,8 N/kg. La caída va a cámara lenta para que se vea.</p>
+    </div>
+
+    <!-- ── RETOS Y ÁLBUM (ocultos por defecto) ──────────────────── -->
+    <aside id="panel-retos" class="panel-retos" hidden aria-labelledby="titulo-retos">
+        <div class="panel-cab"><h2 id="titulo-retos">Retos <small id="retos-modo" class="retos-modo"></small></h2><button type="button" class="boton-cerrar" data-cerrar="panel-retos" aria-label="Cerrar">✕</button></div>
+        <ol id="lista-retos" class="lista-retos"></ol>
+        <div class="album-cab"><h2>Álbum: algo que flote en…</h2><span id="album-cuenta" class="album-cuenta">0 / 7</span></div>
+        <div id="album-mini" class="album-mini album-liquidos"></div>
+        <p class="nota" id="nota-album">Cada líquido se gana al ver flotar un bloque en él.</p>
+        <div class="retos-botones">
+            <button type="button" id="btn-ver-album" class="boton-suelto">Ver el álbum</button>
+            <button type="button" id="btn-borrar" class="boton-suelto boton-peligro">↺ Borrar lo conseguido</button>
+        </div>
+        <div id="confirmar-borrar" class="confirmar" hidden>
+            <p>¿Borrar los retos y sellos conseguidos en este navegador?</p>
+            <div class="retos-botones">
+                <button type="button" id="btn-borrar-si" class="boton-suelto boton-peligro">Sí, borrar</button>
+                <button type="button" id="btn-borrar-no" class="boton-suelto">Cancelar</button>
+            </div>
+        </div>
+    </aside>
+    <div id="album" class="album-modal" hidden role="dialog" aria-modal="true" aria-labelledby="titulo-album">
+        <div class="album-caja">
+            <div class="panel-cab"><h2 id="titulo-album">Álbum: algo que flote en…</h2><button type="button" class="boton-cerrar" data-cerrar="album" aria-label="Cerrar">✕</button></div>
+            <p class="nota">Cada sello se gana al soltar un bloque en ese líquido y verlo flotar quieto. Hay un sello secreto más.</p>
+            <div id="album-tabla" class="album-tabla"></div>
+        </div>
+    </div>
+
+    <script src="js/escena-comun.js"></script>
     <script src="js/parametros.js"></script>
-    <script src="js/sketch.js"></script>
+    <script src="js/dibujo.js"></script>
+    <script src="js/retos.js"></script>
+    <script src="js/escena.js"></script>
 </body>
 </html>
