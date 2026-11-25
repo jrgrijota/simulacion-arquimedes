@@ -1,0 +1,188 @@
+/* ════════════════════════════════════════════════════
+   ESCENA PROPIA DE «PRINCIPIO DE ARQUÍMEDES»
+   Lo común (cabecera, carril, botones, paneles, retos, mandos sobre el
+   lienzo, móvil) está en css/escena-comun.css, que se carga antes.
+════════════════════════════════════════════════════ */
+
+/* Lo que solo se ve en un modo */
+body.modo-libre .only-materiales { display: none !important; }
+body.modo-materiales .only-libre { display: none !important; }
+
+/* ── Cabecera: el interruptor «Fuerzas» va junto a los botones ── */
+.barra-sup { grid-template-columns: minmax(max-content, 1fr) auto minmax(max-content, 1fr) auto; column-gap: 16px; }
+.barra-sup .marca-sim { grid-column: 1; }
+.barra-sup .modos { grid-column: 2; }
+.barra-sup .interruptor { grid-column: 3; justify-self: end; }
+.barra-sup .botones-sup { grid-column: 4; }
+
+.interruptor {
+    display: inline-flex; align-items: center; gap: 12px;
+    height: 40px; padding: 0 8px 0 16px;
+    border: 2px solid var(--accent); border-radius: 20px;
+    background: var(--panel); color: var(--title);
+    font: 600 16px var(--font-fun);
+    box-shadow: 0 3px 0 var(--boton-sombra, #071a2b);
+    cursor: pointer; white-space: nowrap;
+}
+.interruptor-pista {
+    position: relative; width: 42px; height: 22px; border-radius: 11px;
+    border: 2px solid #071a2b; background: var(--accent);
+    transition: background .15s;
+}
+.interruptor-bola {
+    position: absolute; top: 1px; left: 21px; width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; border: 2px solid #071a2b; box-sizing: border-box;
+    transition: left .15s;
+}
+.interruptor[aria-checked="false"] { border-color: var(--line); color: var(--muted); border-width: 1.5px; }
+.interruptor[aria-checked="false"] .interruptor-pista { background: var(--hundido, #0b2236); }
+.interruptor[aria-checked="false"] .interruptor-bola { left: 1px; background: var(--muted); }
+.interruptor:hover { border-color: var(--accent); }
+.interruptor:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .interruptor-pista, .interruptor-bola { transition: none; } }
+
+/* ── Fila de contexto: materiales y acciones ───────── */
+.punto-libre { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #071a2b; background: #9b91d2; flex-shrink: 0; }
+.materiales [data-mat="corcho"] .punto   { background: #d7bc94; }
+.materiales [data-mat="madera"] .punto   { background: #b47a46; }
+.materiales [data-mat="hielo"] .punto    { background: #d6ecff; }
+.materiales [data-mat="plastico"] .punto { background: #cbc6dc; }
+.materiales [data-mat="aluminio"] .punto { background: #c7ced8; }
+.materiales [data-mat="hierro"] .punto   { background: #7d8692; }
+.materiales [data-mat="plomo"] .punto    { background: #6c7380; }
+.materiales [data-mat="oro"] .punto      { background: #f2c94c; }
+/* Arquímedes: una coronita de laurel en lugar del punto */
+.laurel {
+    width: 18px; height: 14px; flex-shrink: 0;
+    background: no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 14'%3E%3Cg fill='%237fae5a'%3E%3Cellipse cx='3' cy='9' rx='3.2' ry='1.7' transform='rotate(-60 3 9)'/%3E%3Cellipse cx='4.5' cy='5' rx='3.2' ry='1.7' transform='rotate(-40 4.5 5)'/%3E%3Cellipse cx='7' cy='2.5' rx='3.2' ry='1.7' transform='rotate(-15 7 2.5)'/%3E%3Cellipse cx='15' cy='9' rx='3.2' ry='1.7' transform='rotate(60 15 9)'/%3E%3Cellipse cx='13.5' cy='5' rx='3.2' ry='1.7' transform='rotate(40 13.5 5)'/%3E%3Cellipse cx='11' cy='2.5' rx='3.2' ry='1.7' transform='rotate(15 11 2.5)'/%3E%3C/g%3E%3C/svg%3E");
+}
+.carril-btn[aria-checked="true"] .laurel { filter: brightness(.45); }
+.carril.materiales .carril-btn { padding: 0 13px; gap: 8px; }
+
+.acciones { display: flex; gap: 10px; margin-left: auto; flex-shrink: 0; }
+.acciones .boton-accion { height: 40px; padding: 0 18px; font: 600 15px var(--font-fun); white-space: nowrap; }
+.acciones .boton-accion[hidden] { display: none; }
+.acciones .boton-accion:disabled { opacity: .45; cursor: default; }
+/* En el móvil, los botones van bajo el depósito, sobre el lienzo */
+.acciones.sobre-lienzo { position: absolute; margin: 0; justify-content: center; gap: calc(var(--u) * 10); }
+.acciones.sobre-lienzo .boton-accion { height: calc(var(--u) * 40); font-size: calc(var(--u) * 14.5); padding: 0 calc(var(--u) * 12); min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Carrusel de materiales: si no caben, se desplazan con las flechas ── */
+.carrusel { position: relative; display: flex; align-items: center; min-width: 0; max-width: 100%; }
+.carrusel .carril.materiales { max-width: 100%; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; }
+.carrusel .carril.materiales::-webkit-scrollbar { display: none; }
+.carrusel.hay-der .carril.materiales { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 64px), transparent calc(100% - 18px)); mask-image: linear-gradient(90deg, #000 calc(100% - 64px), transparent calc(100% - 18px)); }
+.carrusel.hay-izq .carril.materiales { -webkit-mask-image: linear-gradient(90deg, transparent 18px, #000 64px); mask-image: linear-gradient(90deg, transparent 18px, #000 64px); }
+.carrusel.hay-izq.hay-der .carril.materiales { -webkit-mask-image: linear-gradient(90deg, transparent 18px, #000 64px, #000 calc(100% - 64px), transparent calc(100% - 18px)); mask-image: linear-gradient(90deg, transparent 18px, #000 64px, #000 calc(100% - 64px), transparent calc(100% - 18px)); }
+.flecha-carrusel {
+    position: absolute; top: 50%; z-index: 2;
+    width: 34px; height: 34px; margin-top: -17px; border-radius: 50%;
+    display: none; align-items: center; justify-content: center;
+    border: 2px solid var(--line); background: var(--panel); color: var(--title);
+    font: 700 22px/1 var(--font-fun); padding: 0 0 3px; cursor: pointer;
+    box-shadow: 0 3px 0 var(--boton-sombra, #071a2b);
+}
+.flecha-carrusel:hover { border-color: var(--accent); color: var(--accent); }
+.flecha-carrusel.izq { left: -4px; }
+.flecha-carrusel.der { right: -4px; }
+.carrusel.hay-izq .flecha-carrusel.izq, .carrusel.hay-der .flecha-carrusel.der { display: flex; }
+
+/* ── Pestañas del papel (sobre el lienzo) ─────────── */
+.pestanas {
+    position: absolute; display: flex;
+    height: calc(var(--u) * 40); padding: calc(var(--u) * 4);
+    border-radius: calc(var(--u) * 20);
+    background: #c3d7ea; border: 1.5px solid #8fabc2;
+    box-shadow: none;
+}
+.pestanas[hidden] { display: none; }
+.pestanas .carril-btn {
+    height: 100%; justify-content: center; white-space: nowrap;
+    font-size: calc(var(--u) * 15.5); padding: 0 calc(var(--u) * 8);
+    color: #2c4a63; border-radius: calc(var(--u) * 16);
+}
+.pestanas .carril-btn[data-pestana="fuerzas"] { flex: 36; }
+.pestanas .carril-btn[data-pestana="presion"] { flex: 64; }
+.pestanas .carril-btn[aria-selected="true"] { background: var(--accent); color: #071a2b; }
+.pestanas .carril-btn:disabled { opacity: .45; cursor: default; }
+body.theme-contrast .pestanas { background: #000; border-color: #ffff00; }
+body.theme-contrast .pestanas .carril-btn { color: #fff; }
+body.theme-contrast .pestanas .carril-btn[aria-selected="true"] { color: #000; }
+
+/* ── Mandos bajo el depósito ──────────────────────── */
+.mandos-arq { gap: 0; }
+.mandos-arq .fila-slider { height: calc(var(--u) * 20); gap: calc(var(--u) * 8); }
+.mandos-arq .fila-slider label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mandos-arq .valor-slider { white-space: nowrap; flex: none; }
+.mandos-arq .fila-slider + input[type="range"] { margin: calc(var(--u) * 6) 0 0; }
+.mandos-arq .slider-bounds { margin-bottom: calc(var(--u) * 4); }
+.mandos-arq .titulo-mando { margin: 0 0 calc(var(--u) * 10); font: 600 calc(var(--u) * 16.5) var(--font-fun); color: var(--title); }
+.rejilla-liq { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(var(--u) * 6); }
+.mandos-arq.dos-col .rejilla-liq { grid-template-columns: repeat(2, 1fr); }
+.mandos-arq.una-col .rejilla-liq { grid-template-columns: 1fr; gap: calc(var(--u) * 6); }
+.boton-liq {
+    position: relative;
+    display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: calc(var(--u) * 6);
+    align-items: center; text-align: left;
+    height: calc(var(--u) * 40); padding: 0 calc(var(--u) * 5) 0 calc(var(--u) * 8);
+    border: 1.5px solid var(--line); border-radius: calc(var(--u) * 12);
+    background: var(--panel); color: var(--title);
+    box-shadow: 0 calc(var(--u) * 3) 0 var(--boton-sombra, #071a2b);
+    cursor: pointer; overflow: hidden;
+}
+.boton-liq .punto {
+    grid-row: 1 / 3; width: calc(var(--u) * 11); height: calc(var(--u) * 11); border-radius: 50%;
+    border: 2px solid #071a2b;
+}
+.boton-liq span { font: 600 calc(var(--u) * 13.5) var(--font-fun); line-height: 1.05; white-space: nowrap; letter-spacing: -0.01em; }
+.boton-liq small { font: 400 calc(var(--u) * 11.5) system-ui, sans-serif; color: var(--muted); line-height: 1.1; }
+.boton-liq:hover { border-color: var(--accent); }
+.boton-liq[aria-checked="true"] { border: 3px solid var(--accent); }
+.boton-liq:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.boton-liq[data-liq="gasolina"] .punto  { background: #f2d65c; }
+.boton-liq[data-liq="etanol"] .punto    { background: #d9ecf5; }
+.boton-liq[data-liq="aceite"] .punto    { background: #e3b23c; }
+.boton-liq[data-liq="aguadulce"] .punto { background: #3a9be0; }
+.boton-liq[data-liq="aguamar"] .punto   { background: #2fa7b5; }
+.boton-liq[data-liq="glicerina"] .punto { background: #e3edf4; }
+.boton-liq[data-liq="mercurio"] .punto  { background: #b9c2cc; }
+
+/* ── El cuerpo, para el teclado: botón invisible encima del dibujo ── */
+.agarre {
+    position: absolute; z-index: 2;
+    background: transparent; border: 0; padding: 0; margin: 0;
+    border-radius: 8px; pointer-events: none;
+}
+.agarre:focus-visible { outline: 3px dashed var(--accent); outline-offset: 4px; }
+
+/* ── Retos: pista bajo el texto ──────────────────── */
+.reto-pista { color: var(--muted); font: 400 .85rem system-ui, sans-serif; }
+
+/* ── Álbum: siete líquidos y un sello secreto ─────── */
+.album-mini.album-liquidos { grid-template-columns: repeat(8, 1fr); gap: 6px; }
+.album-liquidos .sello { width: 36px; height: 36px; font-size: .95rem; }
+.album-liquidos .sello.ganado { color: #061523; font-weight: 700; }
+.album-liquidos .sello.nuevo { box-shadow: 0 0 0 5px color-mix(in srgb, var(--change) 45%, transparent); }
+.sello.secreto { border-color: var(--change); color: var(--change); }
+.album-tabla .mat-fila { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 14px; }
+.album-tabla .mat-celda { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.album-tabla .mat-celda strong { color: var(--title); font: 600 1rem var(--font-fun); }
+.album-tabla .mat-celda small { color: var(--muted); }
+
+@media (max-width: 980px) {
+    .barra-sup { grid-template-columns: 1fr auto; }
+    .barra-sup .marca-sim { grid-column: 1; grid-row: 1; }
+    .barra-sup .botones-sup { grid-column: 2; grid-row: 1; }
+    .barra-sup .modos { grid-column: 1; grid-row: 2; }
+    .barra-sup .interruptor { grid-column: 2; grid-row: 2; }
+}
+@media (max-width: 760px) {
+    .interruptor { font-size: 14px; gap: 8px; padding: 0 6px 0 12px; }
+    .interruptor-pista { width: 38px; }
+    .interruptor-bola { left: 17px; }
+    .barra-sup .modos .carril-btn { font-size: .82rem; padding: 0 6px; }
+    .barra-sus .sus-info { display: none; }
+    .barra-sus .punto-libre { display: none; }
+    .album-tabla .mat-fila { grid-template-columns: repeat(2, 1fr); }
+    .album-liquidos .sello { width: 32px; height: 32px; }
+}
